@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'checkstyle'
+}
+
+group = 'ch.geowerkstatt.lk2dxf'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+application {
+    mainClass = 'ch.geowerkstatt.lk2dxf.Main'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass,
+                'Class-Path': configurations.runtimeClasspath.collect { file -> file.getName() }.join(' ')
+        )
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
