@@ -1,0 +1,15 @@
+<?xml version ="1.0" encoding ="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+    <HEADERSECTION VERSION="2.3" SENDER="Test">
+        <MODELS>
+            <MODEL NAME="TestData" VERSION="2024-10-30" URI="http://interlis.ch" />
+        </MODELS>
+    </HEADERSECTION>
+    <DATASECTION>
+        <TestData.Test BID="x1">
+            <TestData.Test.Abc TID="obj1">
+                <Attr>value</Attr>
+            </TestData.Test.Abc>
+        </TestData.Test>
+    </DATASECTION>
+</TRANSFER>
