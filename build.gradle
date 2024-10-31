@@ -9,9 +9,13 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url "https://jars.interlis.ch" }
 }
 
 dependencies {
+    implementation 'ch.interlis:iox-ili:1.23.1'
+    implementation 'ch.interlis:ili2c-core:5.5.4'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
