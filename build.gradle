@@ -16,6 +16,8 @@ dependencies {
     implementation 'ch.interlis:iox-ili:1.23.1'
     implementation 'ch.interlis:ili2c-core:5.5.4'
 
+    implementation 'commons-cli:commons-cli:1.9.0'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
@@ -28,7 +30,8 @@ jar {
     manifest {
         attributes(
                 'Main-Class': application.mainClass,
-                'Class-Path': configurations.runtimeClasspath.collect { file -> file.getName() }.join(' ')
+                'Class-Path': configurations.runtimeClasspath.collect { file -> file.getName() }.join(' '),
+                'Implementation-Version': version,
         )
     }
 }
