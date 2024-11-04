@@ -52,9 +52,8 @@ public final class Main {
     private static void processFiles(LK2DxfOptions options) {
         for (String xtfFile : options.xtfFiles()) {
             try (LKMapXtfReader reader = new LKMapXtfReader(new File(xtfFile))) {
-                reader.readObjects(iomObject -> {
-                    System.out.println(iomObject.getobjectoid());
-                });
+                reader.readObjects()
+                        .forEach(o -> System.out.println(o.getobjectoid()));
             } catch (Exception e) {
                 System.err.println("Failed to process file: " + xtfFile);
                 e.printStackTrace();
