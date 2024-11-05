@@ -25,6 +25,18 @@ public final class LKMapXtfReaderTest {
     }
 
     @Test
+    public void readValidXtfMultipleBaskets() throws Exception {
+        try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "ValidMultipleBaskets.xtf"))) {
+            String[] objectIds = reader
+                    .readObjects()
+                    .map(IomObject::getobjectoid)
+                    .toArray(String[]::new);
+
+            assertArrayEquals(new String[] {"basket1object001", "basket1object002", "basket2object001"}, objectIds);
+        }
+    }
+
+    @Test
     public void readXtfForWrongModel() throws Exception {
         try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "WrongModel.xtf"))) {
             Stream<IomObject> objectStream = reader.readObjects();
