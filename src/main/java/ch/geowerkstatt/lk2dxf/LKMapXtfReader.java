@@ -14,7 +14,10 @@ import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.utility.ReaderFactory;
 
 import java.io.File;
+import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A reader for LKMap INTERLIS transfer files.
@@ -24,6 +27,7 @@ public final class LKMapXtfReader implements AutoCloseable {
     private static final ReaderFactory READER_FACTORY = new ReaderFactory();
 
     private final IoxReader reader;
+    private LKMapXtfReaderState state = null;
 
     /**
      * Creates a new reader for LKMap INTERLIS transfer files.
@@ -37,43 +41,106 @@ public final class LKMapXtfReader implements AutoCloseable {
     }
 
     /**
-     * Reads the objects streamed by the reader and passes them to the consumer.
-     * @param consumer A consumer to process the objects.
-     * @throws IoxException If an error occurs while reading the objects.
-     * @throws IllegalStateException If the transfer file is not in the expected format.
+     * Reads the objects as a sequential stream.
+     * Advancing the stream may throw an exception when reading invalid data.
+     * @return A stream of objects contained in the xtf file.
+     * @throws IllegalStateException If this method is called more than once.
      */
-    public void readObjects(Consumer<IomObject> consumer) throws IoxException {
-        IoxEvent event = reader.read();
-        if (!(event instanceof StartTransferEvent)) {
-            throw new IllegalStateException("Expected start transfer event, got: " + event);
+    public Stream<IomObject> readObjects() {
+        if (state != null) {
+            throw new IllegalStateException("readObjects() can only be called once");
         }
+        state = LKMapXtfReaderState.INITIALIZED;
 
-        event = reader.read();
-        while (!(event instanceof EndTransferEvent)) {
-            if (event instanceof StartBasketEvent startBasketEvent) {
-                if (!BASKET_NAME.equals(startBasketEvent.getType())) {
-                    throw new IllegalStateException("Invalid basket type: " + startBasketEvent.getType());
-                }
-            } else {
-                throw new IllegalStateException("Expected start basket event, got: " + event);
-            }
-
-            event = reader.read();
-            while (event instanceof ObjectEvent objectEvent) {
-                consumer.accept(objectEvent.getIomObject());
-                event = reader.read();
-            }
-
-            if (!(event instanceof EndBasketEvent)) {
-                throw new IllegalStateException("Expected end basket event, got: " + event);
-            }
-
-            event = reader.read();
-        }
+        return StreamSupport.stream(new XtfReaderSpliterator(), false);
     }
 
     @Override
     public void close() throws Exception {
         reader.close();
+    }
+
+    private enum LKMapXtfReaderState {
+        INITIALIZED,
+        TRANSFER,
+        BASKET,
+        COMPLETED,
+    }
+
+    /**
+     * A sequential spliterator for reading objects from the surrounding {@link LKMapXtfReader}.
+     * Advancing the spliterator will read from the xtf reader and may throw an exception when reading invalid data.
+     */
+    private class XtfReaderSpliterator implements Spliterator<IomObject> {
+        @Override
+        public boolean tryAdvance(Consumer<? super IomObject> action) {
+            try {
+                IoxEvent event = reader.read();
+                while (event != null) {
+                    switch (event) {
+                        case StartTransferEvent ignored -> {
+                            if (state != LKMapXtfReaderState.INITIALIZED) {
+                                throw new IllegalStateException("Unexpected start transfer event in state: " + state);
+                            }
+                            state = LKMapXtfReaderState.TRANSFER;
+                            System.out.println("Start transfer");
+                        }
+                        case StartBasketEvent startBasketEvent -> {
+                            if (state != LKMapXtfReaderState.TRANSFER) {
+                                throw new IllegalStateException("Unexpected start basket event in state: " + state);
+                            }
+                            if (!BASKET_NAME.equals(startBasketEvent.getType())) {
+                                throw new IllegalStateException("Invalid basket type: " + startBasketEvent.getType());
+                            }
+                            state = LKMapXtfReaderState.BASKET;
+                            System.out.println("Start basket \"" + startBasketEvent.getBid() + "\"");
+                        }
+                        case ObjectEvent objectEvent -> {
+                            if (state != LKMapXtfReaderState.BASKET) {
+                                throw new IllegalStateException("Unexpected object event in state: " + state);
+                            }
+                            action.accept(objectEvent.getIomObject());
+                            return true;
+                        }
+                        case EndBasketEvent ignored -> {
+                            if (state != LKMapXtfReaderState.BASKET) {
+                                throw new IllegalStateException("Unexpected end basket event in state: " + state);
+                            }
+                            state = LKMapXtfReaderState.TRANSFER;
+                            System.out.println("End basket");
+                        }
+                        case EndTransferEvent ignored -> {
+                            if (state != LKMapXtfReaderState.TRANSFER) {
+                                throw new IllegalStateException("Unexpected end transfer event in state: " + state);
+                            }
+                            state = LKMapXtfReaderState.COMPLETED;
+                            System.out.println("End transfer");
+                            return false;
+                        }
+                        default -> throw new IllegalStateException("Unexpected iox event: " + event);
+                    }
+                    event = reader.read();
+                }
+
+                throw new IllegalStateException("Unexpected end of file");
+            } catch (IoxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public Spliterator<IomObject> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return IMMUTABLE | NONNULL;
+        }
     }
 }

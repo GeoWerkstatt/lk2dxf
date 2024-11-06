@@ -1,0 +1,100 @@
+<?xml version ="1.0" encoding ="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+    <HEADERSECTION VERSION="2.3" SENDER="Test">
+        <MODELS>
+            <MODEL NAME="Units" URI="http://www.interlis.ch/models" VERSION="2012-02-20" />
+            <MODEL NAME="Base_LV95" URI="http://www.sia.ch/405" VERSION="05.10.2018" />
+            <MODEL NAME="SIA405_Base_LV95" URI="http://www.sia.ch/405" VERSION="05.10.2018" />
+            <MODEL NAME="SIA405_LKMap_2015_LV95" URI="http://www.sia.ch/405" VERSION="27.04.2018" />
+        </MODELS>
+        <COMMENT>test data</COMMENT>
+    </HEADERSECTION>
+    <DATASECTION>
+        <SIA405_LKMap_2015_LV95.SIA405_LKMap BID="x1">
+            <SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche TID="basket1object001">
+                <OBJ_ID>basket1object001</OBJ_ID>
+                <Metaattribute>
+                    <SIA405_Base_LV95.Metaattribute>
+                        <Datenherr>Test</Datenherr>
+                        <Datenlieferant>Test</Datenlieferant>
+                        <Letzte_Aenderung>20241030</Letzte_Aenderung>
+                    </SIA405_Base_LV95.Metaattribute>
+                </Metaattribute>
+                <Eigentuemer>Test</Eigentuemer>
+                <Lagebestimmung>unbekannt</Lagebestimmung>
+                <Status>in_Betrieb</Status>
+                <Flaeche>
+                    <SURFACE>
+                        <BOUNDARY>
+                            <POLYLINE>
+                                <COORD>
+                                    <C1>2669992.781</C1>
+                                    <C2>1208904.666</C2>
+                                </COORD>
+                                <COORD>
+                                    <C1>2669971.614</C1>
+                                    <C2>1206904.416</C2>
+                                </COORD>
+                                <COORD>
+                                    <C1>2672924.364</C1>
+                                    <C2>1206936.166</C2>
+                                </COORD>
+                                <COORD>
+                                    <C1>2672818.531</C1>
+                                    <C2>1208915.250</C2>
+                                </COORD>
+                                <COORD>
+                                    <C1>2669992.781</C1>
+                                    <C2>1208904.666</C2>
+                                </COORD>
+                            </POLYLINE>
+                        </BOUNDARY>
+                    </SURFACE>
+                </Flaeche>
+                <Objektart>Wasser.unbekannt</Objektart>
+            </SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche>
+            <SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt TID="basket1object002">
+                <OBJ_ID>basket1object002</OBJ_ID>
+                <Metaattribute>
+                    <SIA405_Base_LV95.Metaattribute>
+                        <Datenherr>Test</Datenherr>
+                        <Datenlieferant>Test</Datenlieferant>
+                        <Letzte_Aenderung>20241030</Letzte_Aenderung>
+                    </SIA405_Base_LV95.Metaattribute>
+                </Metaattribute>
+                <Eigentuemer>Test</Eigentuemer>
+                <Lagebestimmung>unbekannt</Lagebestimmung>
+                <Status>in_Betrieb</Status>
+                <SymbolPos>
+                    <COORD>
+                        <C1>2669992.781</C1>
+                        <C2>1208904.666</C2>
+                    </COORD>
+                </SymbolPos>
+                <Objektart>Wasser.Absperrorgan</Objektart>
+            </SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt>
+        </SIA405_LKMap_2015_LV95.SIA405_LKMap>
+        <SIA405_LKMap_2015_LV95.SIA405_LKMap BID="x2">
+            <SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt TID="basket2object001">
+                <OBJ_ID>basket2object001</OBJ_ID>
+                <Metaattribute>
+                    <SIA405_Base_LV95.Metaattribute>
+                        <Datenherr>Test</Datenherr>
+                        <Datenlieferant>Test</Datenlieferant>
+                        <Letzte_Aenderung>20241030</Letzte_Aenderung>
+                    </SIA405_Base_LV95.Metaattribute>
+                </Metaattribute>
+                <Eigentuemer>Test</Eigentuemer>
+                <Lagebestimmung>ungenau</Lagebestimmung>
+                <Status>in_Betrieb</Status>
+                <SymbolPos>
+                    <COORD>
+                        <C1>2669992.781</C1>
+                        <C2>1208904.666</C2>
+                    </COORD>
+                </SymbolPos>
+                <Objektart>Fernwaerme.unbekannt</Objektart>
+            </SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt>
+        </SIA405_LKMap_2015_LV95.SIA405_LKMap>
+    </DATASECTION>
+</TRANSFER>
