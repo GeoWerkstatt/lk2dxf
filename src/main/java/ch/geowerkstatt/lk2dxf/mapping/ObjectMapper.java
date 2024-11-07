@@ -69,7 +69,7 @@ public final class ObjectMapper {
     }
 
     private boolean matchesMapping(LayerMapping layerMapping, IomObject iomObject) {
-        if (!iomObject.getobjecttag().endsWith("." + layerMapping.objectType())) {
+        if (!iomObject.getobjecttag().endsWith("." + layerMapping.objectClass())) {
             return false;
         }
 

@@ -7,7 +7,8 @@ import java.util.Map;
 
 public record LayerMapping(
         String layer,
-        String objectType,
+        String objectClass,
+        String geometryType,
         String geometry,
         int color,
         String orientation,

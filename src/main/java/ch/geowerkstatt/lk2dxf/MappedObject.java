@@ -9,7 +9,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
 public record MappedObject(Geometry geometry, IomObject iomObject, LayerMapping layerMapping) {
-    private static final String BASKET_NAME = "SIA405_LKMap_2015_LV95.SIA405_LKMap";
     private static final GeometryFactory GEOMETRY_FACTORY = new JtsextGeometryFactory();
 
     /**
@@ -21,10 +20,10 @@ public record MappedObject(Geometry geometry, IomObject iomObject, LayerMapping 
      */
     public static MappedObject create(IomObject iomObject, LayerMapping layerMapping) {
         try {
-            Geometry geometry = switch (iomObject.getobjecttag()) {
-                case BASKET_NAME + ".LKPunkt", BASKET_NAME + ".LKObjekt_Text" -> readPoint(iomObject, layerMapping.geometry());
-                case BASKET_NAME + ".LKLinie" -> readLine(iomObject, layerMapping.geometry());
-                case BASKET_NAME + ".LKFlaeche" -> readSurface(iomObject, layerMapping.geometry());
+            Geometry geometry = switch (layerMapping.geometryType()) {
+                case "Point" -> readPoint(iomObject, layerMapping.geometry());
+                case "Line" -> readLine(iomObject, layerMapping.geometry());
+                case "Surface" -> readSurface(iomObject, layerMapping.geometry());
                 default -> throw new IllegalArgumentException("Unsupported object tag: " + iomObject.getobjecttag());
             };
             return new MappedObject(geometry, iomObject, layerMapping);
