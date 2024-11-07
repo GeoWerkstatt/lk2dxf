@@ -1,5 +1,6 @@
 package ch.geowerkstatt.lk2dxf;
 
+import ch.geowerkstatt.lk2dxf.mapping.ObjectMapper;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -54,18 +55,18 @@ public final class Main {
 
     private static void processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
+        AtomicInteger counter = new AtomicInteger();
 
         for (String xtfFile : options.xtfFiles()) {
             try (LKMapXtfReader reader = new LKMapXtfReader(new File(xtfFile))) {
-                AtomicInteger counter = new AtomicInteger();
-                Stream<GeometryObject> objects = reader.readObjects()
-                        .map(GeometryObject::create);
+                ObjectMapper mapper = new ObjectMapper();
+                Stream<MappedObject> objects = mapper.mapObjects(reader.readObjects());
 
                 if (perimeter.isPresent()) {
                     objects = objects.filter(o -> perimeter.get().intersects(o.geometry()));
                 }
 
-                objects.forEach(o -> System.out.println(counter.incrementAndGet() + ": " + o.iomObject().getobjectoid()));
+                objects.forEach(o -> System.out.println(counter.incrementAndGet() + ": " + o.iomObject().getobjectoid() + " -> " + o.layerMapping().layer()));
             } catch (Exception e) {
                 System.err.println("Failed to process file: " + xtfFile);
                 e.printStackTrace();
