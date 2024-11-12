@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation 'ch.interlis:iox-ili:1.23.1'
     implementation 'ch.interlis:ili2c-core:5.5.4'
+    implementation files('libs/jdxf_lib_v2.1.1/jdxf.jar')
 
     implementation 'commons-cli:commons-cli:1.9.0'
 
