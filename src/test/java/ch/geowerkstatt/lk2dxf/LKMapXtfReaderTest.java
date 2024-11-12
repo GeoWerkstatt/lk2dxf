@@ -3,19 +3,11 @@ package ch.geowerkstatt.lk2dxf;
 import ch.interlis.iom.IomObject;
 import org.junit.jupiter.api.Test;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Stroke;
-import java.awt.geom.Path2D;
 import java.io.File;
 import java.util.stream.Stream;
-import java.io.FileWriter;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.jsevy.jdxf.DXFDocument;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public final class LKMapXtfReaderTest {
@@ -65,53 +57,28 @@ public final class LKMapXtfReaderTest {
     public void readXtfForKulm() throws Exception {
         final var dxfWriter = new DxfWriter(TEST_DIR + "partial.dxf");
         try(dxfWriter) {
-            dxfWriter.dxfGraphics.setColor(Color.GREEN);
-            dxfWriter.dxfDocument.setLayer("Surface");
-
-            dxfWriter.dxfGraphics.setColor(Color.RED);
-            Stroke dashed = new BasicStroke(0.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{0.5f, 0.25f}, 0);
-            Stroke continuous = new BasicStroke(0.8f);
-            dxfWriter.dxfGraphics.setStroke(dashed);
-            dxfWriter.dxfDocument.setLayer("Polyline");
-
-            dxfWriter.dxfGraphics.setColor(Color.ORANGE);
-            dxfWriter.dxfDocument.setLayer("Point");
-
-            dxfWriter.dxfGraphics.setColor(Color.CYAN);
-            dxfWriter.dxfDocument.setLayer("Text");
-
-            dxfWriter.dxfDocument.setPenByLayer(true);
-
-            System.out.println(dxfWriter.dxfGraphics.getFont().getFontName());
-            dxfWriter.dxfGraphics.setFont(new Font(dxfWriter.dxfGraphics.getFont().getFontName(), Font.PLAIN, 5));
-
             final var count = new AtomicInteger(0);
             try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "Test.xtf" /*"ckw-kulm_ele.xtf"*/))) {
 
                 reader.readObjects().forEach(iomObject -> {
                     switch (iomObject.getobjecttag()) {
                         case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche" -> {
-                            dxfWriter.dxfDocument.setLayer("Surface");
-                            dxfWriter.writeSurface(iomObject.getattrobj("Flaeche", 0));
+                            iomObject.getattrobj("Flaeche", 0);
                         }
                         case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie" -> {
-                            dxfWriter.dxfDocument.setLayer("Polyline");
-                            dxfWriter.writePolyline(iomObject.getattrobj("Linie", 0));
+                            iomObject.getattrobj("Linie", 0);
                         }
                         case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt" -> {
-                            dxfWriter.dxfDocument.setLayer("Point");
-                            dxfWriter.writePoint(iomObject.getattrobj("SymbolPos", 0), Double.parseDouble(iomObject.getattrvalue("SymbolOri")));
+                            iomObject.getattrobj("SymbolPos", 0);
+                            Double.parseDouble(iomObject.getattrvalue("SymbolOri"));
                         }
                         case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text" -> {
                             //System.out.println(iomObject.getattrvalue("Plantyp"));
-                            dxfWriter.dxfDocument.setLayer("Text");
-                            dxfWriter.writeText(
-                                    iomObject.getattrvalue("Textinhalt"),
-                                    iomObject.getattrobj("TextPos", 0),
-                                    iomObject.getattrvalue("TextHAli"),
-                                    iomObject.getattrvalue("TextVAli"),
-                                    Double.parseDouble(iomObject.getattrvalue("TextOri"))
-                            );
+                            iomObject.getattrvalue("Textinhalt");
+                            iomObject.getattrobj("TextPos", 0);
+                            iomObject.getattrvalue("TextHAli");
+                            iomObject.getattrvalue("TextVAli");
+                            Double.parseDouble(iomObject.getattrvalue("TextOri"));
                         }
                         default -> {
                             System.out.println("Unsupported object: " + iomObject.getobjecttag());
@@ -120,10 +87,7 @@ public final class LKMapXtfReaderTest {
 
                     count.incrementAndGet();
                 });
-
-                //assertEquals(690, count.get());
             }
-            dxfWriter.writeToFile(TEST_DIR + "test.dxf");
 
             var polyline = IomObjectHelper.createPolyline(
                     IomObjectHelper.createCoord("0", "0"),
@@ -186,39 +150,5 @@ public final class LKMapXtfReaderTest {
             dxfWriter.writeSection("OBJECTS",
                     dxfWriter::writeMinimalDictionary);
         }
-    }
-
-    @Test
-    public void writeDxf() throws Exception {
-        var dxfDocument = new DXFDocument("Example");
-        var dxfGraphics = dxfDocument.getGraphics();
-
-        dxfGraphics.setColor(Color.RED);
-        dxfDocument.setLayer("Layer 1");
-        dxfGraphics.setColor(Color.GREEN);
-        Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 10}, 0);
-        dxfGraphics.setStroke(dashed);
-        dxfDocument.setLayer("Layer 2");
-        dxfDocument.setPenByLayer(true);
-
-        dxfDocument.setLayer("Layer 1");
-        dxfGraphics.fillRect(1000, 500, 150, 150);
-
-        dxfDocument.setLayer("Layer 2");
-        var path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-        path.moveTo(0, 0);
-        path.lineTo(50, 200);
-        path.lineTo(100, 0);
-        path.curveTo(100, -100, 0, -100, 0, 0);
-        dxfGraphics.draw(path);
-
-        dxfGraphics.drawRect(700, 500, 200, 150);
-
-        String dxfText = dxfDocument.toDXFString();
-        String filePath = TEST_DIR + "/file.dxf";
-        var fileWriter = new FileWriter(filePath);
-        fileWriter.write(dxfText);
-        fileWriter.flush();
-        fileWriter.close();
     }
 }

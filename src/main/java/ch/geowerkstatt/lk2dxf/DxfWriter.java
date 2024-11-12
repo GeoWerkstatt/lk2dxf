@@ -1,10 +1,7 @@
 package ch.geowerkstatt.lk2dxf;
 
 import ch.interlis.iom.IomObject;
-import com.jsevy.jdxf.DXFDocument;
 
-import java.awt.Graphics2D;
-import java.awt.geom.Path2D;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -20,118 +17,6 @@ public class DxfWriter implements AutoCloseable {
 
     public DxfWriter(String filePath) throws IOException {
         dxfWriter = new FileWriter(filePath, StandardCharsets.UTF_8);
-    }
-
-    DXFDocument dxfDocument = new DXFDocument();
-    Graphics2D dxfGraphics = dxfDocument.getGraphics();
-
-    private static final Path2D.Double marker = new Path2D.Double();
-    static {
-        marker.moveTo(0.2, -0.2);
-        marker.lineTo(-1, 1);
-        marker.lineTo(2, 0);
-        marker.lineTo(-1, -1);
-        marker.lineTo(0.2, 0.2);
-    }
-
-    private Path2D.Double createPath(IomObject polyline) {
-        if (!polyline.getobjecttag().equals("POLYLINE")) throw new IllegalArgumentException("Expected POLYLINE object, got: " + polyline.getobjecttag());
-
-        var path = new Path2D.Double();
-        var segments = polyline.getattrobj("sequence", 0);
-        var startPoint = segments.getattrobj("segment", 0);
-        path.moveTo(Double.parseDouble(startPoint.getattrvalue("C1")), Double.parseDouble(startPoint.getattrvalue("C2")));
-        for (int i = 1; i < segments.getattrvaluecount("segment"); i++) {
-            var segment = segments.getattrobj("segment", i);
-            switch (segment.getobjecttag()) {
-                case "COORD" -> path.lineTo(Double.parseDouble(segment.getattrvalue("C1")), Double.parseDouble(segment.getattrvalue("C2")));
-                default -> throw new IllegalArgumentException("Unsupported Line-Type: " + segment.getobjecttag());
-            }
-        }
-
-        return path;
-    }
-
-    public void writePolyline2d(String layerName, IomObject polyline) throws IOException {
-        var segments = polyline.getattrobj("sequence", 0);
-        var segmentCount = segments.getattrvaluecount("segment");
-
-        writeElement(0, "POLYLINE");
-        writeElement(5, getNextHandle());
-        writeElement(100, "AcDbEntity");
-        writeElement(8, layerName);
-        writeElement(370, -1); // Lineweight by layer
-        writeElement(100, "AcDb2dPolyline");
-        writeElement(66, 1); // entities follow
-        writeElement(10, 0);
-        writeElement(20, 0);
-        writeElement(30, 0);
-        writeElement(70, 0); // closed polyline
-
-        var segment = segments.getattrobj("segment", 0);
-        var prevX = Double.parseDouble(segment.getattrvalue("C1"));
-        var prevY = Double.parseDouble(segment.getattrvalue("C2"));
-        for (int i = 1; i < segmentCount; i++) {
-            segment = segments.getattrobj("segment", i);
-            var x = Double.parseDouble(segment.getattrvalue("C1"));
-            var y = Double.parseDouble(segment.getattrvalue("C2"));
-
-            writeElement(0, "VERTEX");
-            writeElement(5, getNextHandle());
-            writeElement(100, "AcDbEntity");
-            writeElement(8, layerName);
-            writeElement(370, -1); // Lineweight by layer
-            writeElement(100, "AcDbVertex");
-            writeElement(100, "AcDb2dVertex");
-            writeElement(10, prevX);
-            writeElement(20, prevY);
-
-            if (segment.getobjecttag().equals("ARC")) {
-                var ax = Double.parseDouble(segment.getattrvalue("A1"));
-                var ay = Double.parseDouble(segment.getattrvalue("A2"));
-
-                var bulge = Math.tan((Math.PI + Math.atan2(y - ay, x - ax) - Math.atan2(prevY - ay, prevX - ax)) / 2.0);
-                if (Double.isFinite(bulge)) {
-                    writeElement(42, bulge);
-                }
-            }
-
-            prevX = x;
-            prevY = y;
-        }
-
-        writeElement(0, "VERTEX");
-        writeElement(5, getNextHandle());
-        writeElement(100, "AcDbEntity");
-        writeElement(8, layerName);
-        writeElement(370, -1); // Lineweight by layer
-        writeElement(100, "AcDbVertex");
-        writeElement(100, "AcDb2dVertex");
-        writeElement(10, prevX);
-        writeElement(20, prevY);
-
-        writeElement(0, "SEQEND");
-        writeElement(5, getNextHandle());
-        writeElement(100, "AcDbEntity");
-        writeElement(8, layerName);
-    }
-
-    public void writeLwPolyline(String layerName, boolean isClosed, double[] ... points) throws IOException {
-        writeElement(0, "LWPOLYLINE");
-        writeElement(5, getNextHandle());
-        writeElement(8, layerName);
-        writeElement(100, "AcDbEntity");
-        writeElement(100, "AcDbPolyline");
-        writeElement(90, points.length);
-        writeElement(70, isClosed ? 1 : 0); // open polyline
-
-        for (var point : points) {
-            writeElement(10, point[0]);
-            writeElement(20, point[1]);
-            if (point.length > 2) {
-                writeElement(42, point[2]);
-            }
-        }
     }
 
     public void writeLwPolyline(String layerName, IomObject polyline) throws IOException {
@@ -175,23 +60,6 @@ public class DxfWriter implements AutoCloseable {
         writeElement(20, prevY);
     }
 
-    public void writeSurface(IomObject multiSurface) {
-        if (!multiSurface.getobjecttag().equals("MULTISURFACE")) throw new IllegalArgumentException("Expected POLYLINE object, got: " + multiSurface.getobjecttag());
-
-        for (int i = 0; i < multiSurface.getattrvaluecount("surface"); i++) {
-            var surface = multiSurface.getattrobj("surface", i);
-
-            for (int j = 0; j < surface.getattrvaluecount("boundary"); j++) {
-                if (j > 0) throw new IllegalArgumentException("Holes in Surface not supported");
-                var boundary = surface.getattrobj("boundary", j);
-
-                var path = createPath(boundary.getattrobj("polyline", 0));
-                dxfGraphics.fill(path);
-            }
-
-        }
-    }
-
     public void writeCircle(String layerName, double centerX, double centerY, double radius) throws IOException {
         writeElement(0, "CIRCLE");
         writeElement(5, getNextHandle());
@@ -201,49 +69,6 @@ public class DxfWriter implements AutoCloseable {
         writeElement(10, centerX);
         writeElement(20, centerY);
         writeElement(40, radius);
-    }
-
-    public void writeElement(String type, String definition) throws IOException {
-        writeElement(0, type);
-        writeElement(5, getNextHandle());
-        dxfWriter.write(definition);
-    }
-
-    @Deprecated
-    public void writeHatch(String layerName) throws IOException {
-        writeElement(0, "HATCH");
-        writeElement(5, getNextHandle());
-        writeElement(100, "AcDbEntity");
-        writeElement(8, layerName);
-        writeElement(370, -1); // Lineweight by layer
-        writeElement(100, "AcDbHatch");
-        writeElement(10, 0);
-        writeElement(20, 0);
-        writeElement(30, 0);
-        writeElement(210, 0);
-        writeElement(220, 0);
-        writeElement(230, 1);
-        writeElement(2, "SOLID");
-        writeElement(70, 1); // solid fill
-        writeElement(71, 0); // not associative
-
-        writeElement(91, 1); // boundary count
-
-        writeElement(92, 1); // external boundary
-        writeElement(72, 3); // elliptic arc
-        writeElement(73, 1); // is counterclockwise flag
-        writeElement(10, 0); // center x
-        writeElement(20, 0); // center y
-        writeElement(11, 0.333); // major axis x
-        writeElement(21, 0.333); // major axis y
-        writeElement(40, 1.0); // Length of minor axis (percentage of major axis length)
-        writeElement(50, 315.0); // start angle
-        writeElement(51, 675.0); // end angle
-        writeElement(97, 0);
-
-        writeElement(75, 0); // hatch "odd parity"
-        writeElement(76, 1); // hatch pattern predefined
-        writeElement(98, 0); // number of seed points
     }
 
     public void writeHatch(String layerName, IomObject multiSurface) throws IOException {
@@ -326,10 +151,6 @@ public class DxfWriter implements AutoCloseable {
         writeElement(98, 0); // no seed points
     }
 
-    public void writePolyline(IomObject polyline) {
-        dxfGraphics.draw(createPath(polyline));
-    }
-
     public void writeBlockInsert(String layerName, String blockName, double rotation, IomObject point) throws IOException {
         writeElement(0, "INSERT");
         writeElement(5, getNextHandle());
@@ -340,28 +161,6 @@ public class DxfWriter implements AutoCloseable {
         writeElement(10, Double.parseDouble(point.getattrvalue("C1")));
         writeElement(20, Double.parseDouble(point.getattrvalue("C2")));
         writeElement(50, rotation);
-    }
-
-    public void writePoint(IomObject point, double orientation /*, String symbolName */) {
-        if (!point.getobjecttag().equals("COORD")) throw new IllegalArgumentException("Expected COORD object, got: " + point.getobjecttag());
-
-        dxfDocument.insertShapesAsBlocks(true);
-        var currentTransform = dxfGraphics.getTransform();
-        dxfGraphics.translate(Double.parseDouble(point.getattrvalue("C1")), Double.parseDouble(point.getattrvalue("C2")));
-        dxfGraphics.rotate(Math.toRadians(orientation));
-        dxfGraphics.draw(marker);
-        dxfGraphics.setTransform(currentTransform);
-        dxfDocument.insertShapesAsBlocks(false);
-    }
-
-    public void writeText(String text, IomObject position, String hAlignment, String vAlignment, double orientation) {
-        if (!position.getobjecttag().equals("COORD")) throw new IllegalArgumentException("Expected COORD object, got: " + position.getobjecttag());
-
-        var currentTransform = dxfGraphics.getTransform();
-        dxfGraphics.translate(Double.parseDouble(position.getattrvalue("C1")), Double.parseDouble(position.getattrvalue("C2")));
-        dxfGraphics.rotate(Math.toRadians(orientation) - (Math.PI / 2));
-        dxfGraphics.drawString(text, 0, 0);
-        dxfGraphics.setTransform(currentTransform);
     }
 
     public void writeText(String layerName, String textStyle, String text, String hAlignment, String vAlignment, double orientation, IomObject position) throws IOException {
@@ -404,14 +203,6 @@ public class DxfWriter implements AutoCloseable {
         writeElement(100, "AcDbText");
         if (vAlignmentValue != 0) {
             writeElement(73, vAlignmentValue);
-        }
-    }
-
-    public void writeToFile(String filePath) throws IOException {
-        String dxfText = dxfDocument.toDXFString();
-        try (var fileWriter = new FileWriter(filePath)) {
-            fileWriter.write(dxfText);
-            fileWriter.flush();
         }
     }
 
