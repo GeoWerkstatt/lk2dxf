@@ -1,5 +1,6 @@
 package ch.geowerkstatt.lk2dxf;
 
+import ch.geowerkstatt.lk2dxf.mapping.LayerMapping;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.itf.impl.jtsext.geom.JtsextGeometryFactory;
 import ch.interlis.iox.IoxException;
@@ -7,8 +8,7 @@ import ch.interlis.iox_j.jts.Iox2jtsext;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-public record GeometryObject(Geometry geometry, IomObject iomObject) {
-    private static final String BASKET_NAME = "SIA405_LKMap_2015_LV95.SIA405_LKMap";
+public record MappedObject(Geometry geometry, IomObject iomObject, LayerMapping layerMapping) {
     private static final GeometryFactory GEOMETRY_FACTORY = new JtsextGeometryFactory();
 
     /**
@@ -18,16 +18,15 @@ public record GeometryObject(Geometry geometry, IomObject iomObject) {
      * @throws IllegalArgumentException If the object tag is not supported.
      * @throws RuntimeException If an error occurs while extracting the geometry.
      */
-    public static GeometryObject create(IomObject iomObject) {
+    public static MappedObject create(IomObject iomObject, LayerMapping layerMapping) {
         try {
-            Geometry geometry = switch (iomObject.getobjecttag()) {
-                case BASKET_NAME + ".LKPunkt" -> readPoint(iomObject, "SymbolPos");
-                case BASKET_NAME + ".LKLinie" -> readLine(iomObject, "Linie");
-                case BASKET_NAME + ".LKFlaeche" -> readSurface(iomObject, "Flaeche");
-                case BASKET_NAME + ".LKObjekt_Text" -> readPoint(iomObject, "TextPos");
+            Geometry geometry = switch (layerMapping.geometryType()) {
+                case "Point" -> readPoint(iomObject, layerMapping.geometry());
+                case "Line" -> readLine(iomObject, layerMapping.geometry());
+                case "Surface" -> readSurface(iomObject, layerMapping.geometry());
                 default -> throw new IllegalArgumentException("Unsupported object tag: " + iomObject.getobjecttag());
             };
-            return new GeometryObject(geometry, iomObject);
+            return new MappedObject(geometry, iomObject, layerMapping);
         } catch (IoxException e) {
             throw new RuntimeException("Error creating geometry for object with id \"" + iomObject.getobjectoid() + "\".", e);
         }
