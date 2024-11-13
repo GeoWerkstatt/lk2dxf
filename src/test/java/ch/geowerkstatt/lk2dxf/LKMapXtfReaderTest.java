@@ -1,5 +1,6 @@
 package ch.geowerkstatt.lk2dxf;
 
+import ch.geowerkstatt.lk2dxf.mapping.ObjectMapper;
 import ch.interlis.iom.IomObject;
 import org.junit.jupiter.api.Test;
 
@@ -55,40 +56,8 @@ public final class LKMapXtfReaderTest {
 
     @Test
     public void readXtfForKulm() throws Exception {
-        final var dxfWriter = new DxfWriter(TEST_DIR + "partial.dxf");
+        final var dxfWriter = new DxfWriter(TEST_DIR + "partial_bad.dxf", 3, ObjectMapper.getLayerMappings());
         try(dxfWriter) {
-            final var count = new AtomicInteger(0);
-            try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "Test.xtf" /*"ckw-kulm_ele.xtf"*/))) {
-
-                reader.readObjects().forEach(iomObject -> {
-                    switch (iomObject.getobjecttag()) {
-                        case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche" -> {
-                            iomObject.getattrobj("Flaeche", 0);
-                        }
-                        case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie" -> {
-                            iomObject.getattrobj("Linie", 0);
-                        }
-                        case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt" -> {
-                            iomObject.getattrobj("SymbolPos", 0);
-                            Double.parseDouble(iomObject.getattrvalue("SymbolOri"));
-                        }
-                        case "SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text" -> {
-                            //System.out.println(iomObject.getattrvalue("Plantyp"));
-                            iomObject.getattrvalue("Textinhalt");
-                            iomObject.getattrobj("TextPos", 0);
-                            iomObject.getattrvalue("TextHAli");
-                            iomObject.getattrvalue("TextVAli");
-                            Double.parseDouble(iomObject.getattrvalue("TextOri"));
-                        }
-                        default -> {
-                            System.out.println("Unsupported object: " + iomObject.getobjecttag());
-                        }
-                    }
-
-                    count.incrementAndGet();
-                });
-            }
-
             var polyline = IomObjectHelper.createPolyline(
                     IomObjectHelper.createCoord("0", "0"),
                     IomObjectHelper.createCoord("0", "200"),
@@ -106,49 +75,8 @@ public final class LKMapXtfReaderTest {
 
             var point = IomObjectHelper.createCoord("120", "120");
 
-            dxfWriter.writeHeader();
-            dxfWriter.writeSection("CLASSES");
-
-            dxfWriter.writeSection("TABLES",
-                    () -> dxfWriter.writeTable("VPORT",
-                            dxfWriter::writeDefaultViewport),
-                    () -> dxfWriter.writeTable("LTYPE",
-                            () -> dxfWriter.writeLineType("ByLayer"),
-                            () -> dxfWriter.writeLineType("ByBlock"),
-                            () -> dxfWriter.writeLineType("Continuous"),
-                            () -> dxfWriter.writeLineType("Dashed", 0.5, -0.25)),
-                    () -> dxfWriter.writeTable("LAYER",
-                            () -> dxfWriter.writeLayer("0", "Continuous", 0),
-                            () -> dxfWriter.writeLayer("Surface", "Continuous", 3),
-                            () -> dxfWriter.writeLayer("Polyline", "Dashed", 1),
-                            () -> dxfWriter.writeLayer("Point", "Continuous", 40)),
-                    () -> dxfWriter.writeTable("STYLE",
-                            () -> dxfWriter.writeStyle("cadastra", "cadastra_regular.ttf")),
-                    () -> dxfWriter.writeTable("VIEW"),
-                    () -> dxfWriter.writeTable("UCS"),
-                    () -> dxfWriter.writeTable("APPID",
-                            dxfWriter::writeDefaultAppid),
-                    dxfWriter::writeMinimalDimstyleTable,
-                    () -> dxfWriter.writeTable("BLOCK_RECORD",
-                            () -> dxfWriter.writeBlockRecord("*Model_Space"),
-                            () -> dxfWriter.writeBlockRecord("*Paper_Space"),
-                            () -> dxfWriter.writeBlockRecord("BAW15")));
-
-            dxfWriter.writeSection("BLOCKS",
-                    () -> dxfWriter.writeBlock("*Model_Space"),
-                    () -> dxfWriter.writeBlock("*Paper_Space"),
-                    () -> dxfWriter.writeBlock("BAW15",
-                            () -> dxfWriter.writeCircle("0", 0, 0, 0.5)));
-
-            dxfWriter.writeSection("ENTITIES",
-                    () -> dxfWriter.writeHatch("Surface", surface),
-                    () -> dxfWriter.writeLwPolyline("Polyline", polyline),
-                    () -> dxfWriter.writeCircle("Point", 100, 100, 100),
-                    () -> dxfWriter.writeText("Point", "cadastra", "Mid-Point", "Right", "Top", 90, point),
-                    () -> dxfWriter.writeBlockInsert("Point", "BAW15", -90, point));
-
-            dxfWriter.writeSection("OBJECTS",
-                    dxfWriter::writeMinimalDictionary);
+            dxfWriter.writeLwPolyline("ELE-LINIE-UNGENAU", polyline);
+            dxfWriter.writeBlockInsert("ELE-PUNKT", "BEW15", 0, point);
         }
     }
 }

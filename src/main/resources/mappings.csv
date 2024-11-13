@@ -1,5 +1,5 @@
 Layer                  ,ObjectClass   ,GeometryType ,Geometry  ,Color ,Orientation ,VAlign   ,HAlign   ,Text       ,Symbol ,Linetype   ,Lineweight ,Textsize ,Font     ,Mapping
-STILLGELEGTE-LEITUNGEN ,LKLinie       ,Line         ,Linie     ,8     ,            ,         ,         ,           ,       ,Crossed    ,0.25       ,         ,         ,Status=tot
+STILLGELEGTE-LEITUNGEN ,LKLinie       ,Line         ,Linie     ,8     ,            ,         ,         ,           ,       ,DashDotDot ,0.25       ,         ,         ,Status=tot
 ABW-LINIEFWK-GENAU     ,LKLinie       ,Line         ,Linie     ,210   ,            ,         ,         ,           ,       ,Continuous ,0.25       ,         ,         ,Objektart=Abwasser.Fernwirkkabel Lagebestimmung=genau
 ABW-LINIEFWK-UNGENAU   ,LKLinie       ,Line         ,Linie     ,210   ,            ,         ,         ,           ,       ,Dashed     ,0.25       ,         ,         ,Objektart=Abwasser.Fernwirkkabel Lagebestimmung=ungenau|unbekannt
 ABW-LINIE-GENAU        ,LKLinie       ,Line         ,Linie     ,210   ,            ,         ,         ,           ,       ,Continuous ,0.25       ,         ,         ,Objektart=Abwasser.Haltung_Kanal|Abwasser.Schutzrohr Lagebestimmung=genau

@@ -1,22 +1,89 @@
 package ch.geowerkstatt.lk2dxf;
 
+import ch.geowerkstatt.lk2dxf.mapping.LayerMapping;
 import ch.interlis.iom.IomObject;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Stream;
 
-public class DxfWriter implements AutoCloseable {
-
-    private final DecimalFormat decimalFormat = new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.ROOT));
+public final class DxfWriter implements AutoCloseable {
+    private final DecimalFormat decimalFormat;
     private final Writer dxfWriter;
     private int handle = 1;
 
     public DxfWriter(String filePath) throws IOException {
+        this(filePath, 3, Collections.emptyList());
+    }
+
+    public DxfWriter(String filePath, int doublePrecision, Collection<LayerMapping> layerMappings) throws IOException {
+        if (doublePrecision < 0) {
+            throw new IllegalArgumentException("doublePrecision must be positive or zero.");
+        }
+        if (layerMappings == null) {
+            throw new IllegalArgumentException("layerMappings must not be null.");
+        }
+
         dxfWriter = new FileWriter(filePath, StandardCharsets.UTF_8);
+        decimalFormat = new DecimalFormat("0." + "#".repeat(doublePrecision), new DecimalFormatSymbols(Locale.ROOT));
+
+        prepareDxfForWritingEntities(layerMappings);
+    }
+
+    private void prepareDxfForWritingEntities(Collection<LayerMapping> layerMappings) throws IOException {
+        var layers = new TreeMap<String, ContentWriter>();
+        layers.put("0", () -> writeLayer("0", "Continuous", 0));
+        for (var mapping : layerMappings) {
+            layers.putIfAbsent(mapping.layer(), () -> writeLayer(mapping.layer(), mapping.linetype(), mapping.color()));
+        }
+
+        List<String> symbols = layerMappings.stream().map(LayerMapping::symbol).distinct().filter(s -> !s.isEmpty()).toList();
+        var blockSymbolRecords = Stream.concat(Stream.of("*Model_Space", "*Paper_Space"), symbols.stream())
+                .map(s -> (ContentWriter) (() -> writeBlockRecord(s))).toArray(ContentWriter[]::new);
+        var blockSymbols = Stream.concat(Stream.of(
+                        () -> writeBlock("*Model_Space"),
+                        () -> writeBlock("*Paper_Space")
+                ), symbols.stream()
+                        .map(s -> (ContentWriter) (() -> writeBlock(s, () -> writeCircle("0", 0, 0, 0.5)))))
+                .toArray(ContentWriter[]::new);
+
+        writeHeader();
+        writeSection("CLASSES");
+
+        writeSection("TABLES",
+                () -> writeTable("VPORT",
+                        this::writeDefaultViewport),
+                () -> writeTable("LTYPE",
+                        () -> writeLineType("ByLayer"),
+                        () -> writeLineType("ByBlock"),
+                        () -> writeLineType("Continuous"),
+                        () -> writeLineType("Dashed", 0.5, -0.25),
+                        () -> writeLineType("DashDotDot", 0.5, -0.25, 0.0, -0.25, 0.0, -0.25)),
+                () -> writeTable("LAYER", layers.values().toArray(ContentWriter[]::new)),
+                () -> writeTable("STYLE",
+                        () -> writeStyle("cadastra", "cadastra_regular.ttf")),
+                () -> writeTable("VIEW"),
+                () -> writeTable("UCS"),
+                () -> writeTable("APPID",
+                        this::writeDefaultAppid),
+                this::writeMinimalDimstyleTable,
+                () -> writeTable("BLOCK_RECORD", blockSymbolRecords));
+
+        writeSection("BLOCKS", blockSymbols);
+
+        writeElement(0, "SECTION");
+        writeElement(2, "ENTITIES");
+    }
+
+    private void finishDxfAfterWritingEntities() throws IOException {
+        writeElement(0, "ENDSEC");
+        writeSection("OBJECTS", this::writeMinimalDictionary);
+        writeElement(0, "EOF");
     }
 
     public void writeLwPolyline(String layerName, IomObject polyline) throws IOException {
@@ -25,57 +92,24 @@ public class DxfWriter implements AutoCloseable {
 
         writeElement(0, "LWPOLYLINE");
         writeElement(5, getNextHandle());
-        writeElement(8, layerName);
         writeElement(100, "AcDbEntity");
+        writeElement(8, layerName);
         writeElement(100, "AcDbPolyline");
-        writeElement(90, segmentCount);
-        writeElement(70, 0); // open polyline
 
         var segment = segments.getattrobj("segment", 0);
-        var prevX = Double.parseDouble(segment.getattrvalue("C1"));
-        var prevY = Double.parseDouble(segment.getattrvalue("C2"));
-        for (int i = 1; i < segmentCount; i++) {
-            segment = segments.getattrobj("segment", i);
-            var x = Double.parseDouble(segment.getattrvalue("C1"));
-            var y = Double.parseDouble(segment.getattrvalue("C2"));
+        var lastSegment = segments.getattrobj("segment", segmentCount - 1);
+        var isClosed = segment.getattrvalue("C1").equals(lastSegment.getattrvalue("C1")) && segment.getattrvalue("C2").equals(lastSegment.getattrvalue("C2"));
+        writeElement(90, segmentCount - (isClosed ? 1 : 0));
+        writeElement(70, isClosed ? 1 : 0);
 
-            writeElement(10, prevX);
-            writeElement(20, prevY);
-
-            if (segment.getobjecttag().equals("ARC")) {
-                var ax = Double.parseDouble(segment.getattrvalue("A1"));
-                var ay = Double.parseDouble(segment.getattrvalue("A2"));
-
-                var bulge = Math.tan((Math.PI + Math.atan2(y - ay, x - ax) - Math.atan2(prevY - ay, prevX - ax)) / 2.0);
-                if (Double.isFinite(bulge)) {
-                    writeElement(42, bulge);
-                }
-            }
-
-            prevX = x;
-            prevY = y;
-        }
-
-        writeElement(10, prevX);
-        writeElement(20, prevY);
-    }
-
-    public void writeCircle(String layerName, double centerX, double centerY, double radius) throws IOException {
-        writeElement(0, "CIRCLE");
-        writeElement(5, getNextHandle());
-        writeElement(100, "AcDbEntity");
-        writeElement(8, layerName);
-        writeElement(100, "AcDbCircle");
-        writeElement(10, centerX);
-        writeElement(20, centerY);
-        writeElement(40, radius);
+        writePolylinePoints(polyline, isClosed);
     }
 
     public void writeHatch(String layerName, IomObject multiSurface) throws IOException {
         writeElement(0, "HATCH");
         writeElement(5, getNextHandle());
-        writeElement(8, layerName);
         writeElement(100, "AcDbEntity");
+        writeElement(8, layerName);
         writeElement(100, "AcDbHatch");
         writeElement(10, 0.0);
         writeElement(20, 0.0);
@@ -105,43 +139,11 @@ public class DxfWriter implements AutoCloseable {
                 var segmentCount = segments.getattrvaluecount("segment");
 
                 writeElement(92, (j == 0 ? 1 /*external*/ : 16 /*outermost*/) + 2 /*polygon*/);
-
                 writeElement(72, 1); // has bulge
                 writeElement(73, 1); // is closed
-                writeElement(93, segmentCount);
+                writeElement(93, segmentCount - 1);
 
-                var segment = segments.getattrobj("segment", 0);
-                var prevX = Double.parseDouble(segment.getattrvalue("C1"));
-                var prevY = Double.parseDouble(segment.getattrvalue("C2"));
-                for (int k = 1; k < segmentCount; k++) {
-                    segment = segments.getattrobj("segment", k);
-                    var x = Double.parseDouble(segment.getattrvalue("C1"));
-                    var y = Double.parseDouble(segment.getattrvalue("C2"));
-
-                    writeElement(10, prevX);
-                    writeElement(20, prevY);
-
-                    if (segment.getobjecttag().equals("ARC")) {
-                        var ax = Double.parseDouble(segment.getattrvalue("A1"));
-                        var ay = Double.parseDouble(segment.getattrvalue("A2"));
-
-                        var bulge = Math.tan((Math.PI + Math.atan2(y - ay, x - ax) - Math.atan2(prevY - ay, prevX - ax)) / 2.0);
-                        if (Double.isFinite(bulge)) {
-                            writeElement(42, bulge);
-                        }
-                    }
-                    else {
-                        writeElement(42, 0.0);
-                    }
-
-                    prevX = x;
-                    prevY = y;
-                }
-
-                writeElement(10, prevX);
-                writeElement(20, prevY);
-                writeElement(42, 0.0);
-
+                writePolylinePoints(polyline, true);
                 writeElement(97, 0); // no source boundaries
             }
         }
@@ -149,6 +151,53 @@ public class DxfWriter implements AutoCloseable {
         writeElement(75, 0); // hatch "odd parity"
         writeElement(76, 1); // hatch pattern predefined
         writeElement(98, 0); // no seed points
+    }
+
+    private void writePolylinePoints(IomObject polyline, boolean isClosed) throws IOException {
+        var segments = polyline.getattrobj("sequence", 0);
+
+        var segment = segments.getattrobj("segment", 0);
+        var prevX = Double.parseDouble(segment.getattrvalue("C1"));
+        var prevY = Double.parseDouble(segment.getattrvalue("C2"));
+
+        for (int i = 1; i < segments.getattrvaluecount("segment"); i++) {
+            segment = segments.getattrobj("segment", i);
+            var x = Double.parseDouble(segment.getattrvalue("C1"));
+            var y = Double.parseDouble(segment.getattrvalue("C2"));
+
+            writeElement(10, prevX);
+            writeElement(20, prevY);
+
+            if (segment.getobjecttag().equals("ARC")) {
+                var ax = Double.parseDouble(segment.getattrvalue("A1"));
+                var ay = Double.parseDouble(segment.getattrvalue("A2"));
+
+                var bulge = Math.tan((Math.PI + Math.atan2(y - ay, x - ax) - Math.atan2(prevY - ay, prevX - ax)) / 2.0);
+                writeElement(42, Double.isFinite(bulge) ? bulge : 0.0);
+            } else {
+                writeElement(42, 0.0);
+            }
+
+            prevX = x;
+            prevY = y;
+        }
+
+        if (!isClosed) {
+            writeElement(10, prevX);
+            writeElement(20, prevY);
+            writeElement(42, 0.0);
+        }
+    }
+
+    public void writeCircle(String layerName, double centerX, double centerY, double radius) throws IOException {
+        writeElement(0, "CIRCLE");
+        writeElement(5, getNextHandle());
+        writeElement(100, "AcDbEntity");
+        writeElement(8, layerName);
+        writeElement(100, "AcDbCircle");
+        writeElement(10, centerX);
+        writeElement(20, centerY);
+        writeElement(40, radius);
     }
 
     public void writeBlockInsert(String layerName, String blockName, double rotation, IomObject point) throws IOException {
@@ -182,8 +231,8 @@ public class DxfWriter implements AutoCloseable {
 
         writeElement(0, "TEXT");
         writeElement(5, getNextHandle());
-        writeElement(8, layerName);
         writeElement(100, "AcDbEntity");
+        writeElement(8, layerName);
         writeElement(100, "AcDbText");
         writeElement(7, textStyle);
         writeElement(10, isDefaultAlignment ? Double.parseDouble(position.getattrvalue("C1")) : 0.0);
@@ -206,7 +255,7 @@ public class DxfWriter implements AutoCloseable {
         }
     }
 
-    public void writeHeader() throws IOException {
+    private void writeHeader() throws IOException {
         writeSection("HEADER",
                 () -> writeElement(9, "$ACADVER"),
                 () -> writeElement(1, "AC1021"),
@@ -216,7 +265,7 @@ public class DxfWriter implements AutoCloseable {
                 () -> writeElement(70, 6 /* Meters */));
     }
 
-    public void writeDefaultAppid() throws IOException {
+    private void writeDefaultAppid() throws IOException {
         writeElement(0, "APPID");
         writeElement(5, getNextHandle());
         writeElement(100, "AcDbSymbolTableRecord");
@@ -225,7 +274,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(70, 0);
     }
 
-    public void writeMinimalDimstyleTable() throws IOException {
+    private void writeMinimalDimstyleTable() throws IOException {
         writeElement(0, "TABLE");
         writeElement(2, "DIMSTYLE");
         writeElement(5, getNextHandle());
@@ -236,7 +285,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(0, "ENDTAB");
     }
 
-    public void writeSection(String name, ContentWriter ... writeContent) throws IOException {
+    private void writeSection(String name, ContentWriter... writeContent) throws IOException {
         writeElement(0, "SECTION");
         writeElement(2, name);
         for (var content : writeContent) {
@@ -245,7 +294,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(0, "ENDSEC");
     }
 
-    public void writeTable(String name, ContentWriter ... writeContent) throws IOException {
+    private void writeTable(String name, ContentWriter... writeContent) throws IOException {
         writeElement(0, "TABLE");
         writeElement(2, name);
         writeElement(5, getNextHandle());
@@ -257,7 +306,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(0, "ENDTAB");
     }
 
-    public void writeBlockRecord(String name) throws IOException {
+    private void writeBlockRecord(String name) throws IOException {
         writeElement(0, "BLOCK_RECORD");
         writeElement(5, getNextHandle());
         writeElement(100, "AcDbSymbolTableRecord");
@@ -268,7 +317,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(281, 0); // is scalable
     }
 
-    public void writeBlock(String name, ContentWriter ... writeContent) throws IOException {
+    private void writeBlock(String name, ContentWriter... writeContent) throws IOException {
         writeElement(0, "BLOCK");
         writeElement(5, getNextHandle());
         writeElement(8, "0"); // layer
@@ -308,7 +357,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(281, 1);
     }
 
-    public void writeDefaultViewport() throws IOException {
+    private void writeDefaultViewport() throws IOException {
         writeElement(0, "VPORT");
         writeElement(5, getNextHandle());
         writeElement(100, "AcDbSymbolTableRecord");
@@ -317,7 +366,7 @@ public class DxfWriter implements AutoCloseable {
         writeElement(70, 0);
     }
 
-    public void writeStyle(String name, String font) throws IOException {
+    private void writeStyle(String name, String font) throws IOException {
         writeElement(0, "STYLE");
         writeElement(5, getNextHandle());
         writeElement(100, "AcDbSymbolTableRecord");
@@ -327,20 +376,20 @@ public class DxfWriter implements AutoCloseable {
         writeElement(70, 0);
     }
 
-    public void writeLayer(String name, String lineTypeName, int color) throws IOException {
+    private void writeLayer(String name, String lineTypeName, int color) throws IOException {
         writeElement(0, "LAYER");
         writeElement(5, getNextHandle());
         writeElement(100, "AcDbSymbolTableRecord");
         writeElement(100, "AcDbLayerTableRecord");
         writeElement(2, name);
-        writeElement(6, lineTypeName);
+        writeElement(6, lineTypeName.isEmpty() ? "Continuous" : lineTypeName);
         writeElement(370, 25); // lineweight
         writeElement(62, color);
         writeElement(70, 0);
         writeElement(390, 0);
     }
 
-    public void writeLineType(String name, double ... pattern) throws IOException {
+    private void writeLineType(String name, double... pattern) throws IOException {
         writeElement(0, "LTYPE");
         writeElement(5, getNextHandle());
         writeElement(100, "AcDbSymbolTableRecord");
@@ -377,11 +426,11 @@ public class DxfWriter implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        writeElement(0, "EOF");
+        finishDxfAfterWritingEntities();
         dxfWriter.close();
     }
 
-    public interface ContentWriter {
+    private interface ContentWriter {
         void write() throws IOException;
     }
 }
