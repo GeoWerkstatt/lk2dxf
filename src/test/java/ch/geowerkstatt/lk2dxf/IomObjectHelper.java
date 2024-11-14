@@ -3,7 +3,9 @@ package ch.geowerkstatt.lk2dxf;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
 
-public class IomObjectHelper {
+public final class IomObjectHelper {
+    private IomObjectHelper() {
+    }
 
     /**
      * Create an IomObject containing a rectangle surface geometry with the specified corner coordinates.

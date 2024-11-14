@@ -57,7 +57,7 @@ public final class Main {
         Optional<Geometry> perimeter = options.parsePerimeter();
         AtomicInteger counter = new AtomicInteger();
 
-        try (var dxfWriter = new DxfWriter(options.dxfFile(), 3, ObjectMapper.getLayerMappings())) {
+        try (var dxfWriter = new DxfWriter(options.dxfFile(), 3, ObjectMapper.getLayerMappings(), "lk2dxf " + Main.VERSION)) {
             for (String xtfFile : options.xtfFiles()) {
                 try (LKMapXtfReader reader = new LKMapXtfReader(new File(xtfFile))) {
                     ObjectMapper mapper = new ObjectMapper();

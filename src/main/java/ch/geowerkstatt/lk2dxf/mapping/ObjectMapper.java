@@ -29,6 +29,9 @@ public final class ObjectMapper {
         }
     }
 
+    /**
+     * Get the layer mappings as an immutable list.
+     */
     public static List<LayerMapping> getLayerMappings() {
         return Collections.unmodifiableList(LAYER_MAPPINGS);
     }
