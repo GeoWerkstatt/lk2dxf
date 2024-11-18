@@ -273,13 +273,13 @@ public final class DxfWriter implements AutoCloseable {
      * @param position The position of the text.
      * @see <a href="https://help.autodesk.com/view/OARX/2024/ENU/?guid=GUID-62E5383D-8A14-47B4-BFC4-35824CAE8363">TEXT (DXF Reference)</a>
      */
-    public void writeText(String layerName, String textStyle, String text, String hAlignment, String vAlignment, double orientation, IomObject position) throws IOException {
-        var hAlignmentValue = switch (hAlignment.toLowerCase(Locale.ROOT)) {
+    public void writeText(String layerName, String textStyle, String text, String hAlignment, String vAlignment, double orientation, double size, IomObject position) throws IOException {
+        var hAlignmentValue = switch (Objects.requireNonNullElse(hAlignment, "").toLowerCase(Locale.ROOT)) {
             case "right" -> 2;
             case "center" -> 1;
             default -> 0; // Left
         };
-        var vAlignmentValue = switch (vAlignment.toLowerCase(Locale.ROOT)) {
+        var vAlignmentValue = switch (Objects.requireNonNullElse(vAlignment, "").toLowerCase(Locale.ROOT)) {
             case "top", "cap" -> 3;
             case "half" -> 2;
             case "bottom" -> 1;
@@ -297,7 +297,7 @@ public final class DxfWriter implements AutoCloseable {
         writeElement(7, textStyle);
         writeElement(10, isDefaultAlignment ? Double.parseDouble(position.getattrvalue("C1")) : 0.0);
         writeElement(20, isDefaultAlignment ? Double.parseDouble(position.getattrvalue("C2")) : 0.0);
-        writeElement(40, 1.25); // text height
+        writeElement(40, size); // text height
         writeElement(1, text);
         if (hAlignmentValue != 0) {
             writeElement(72, hAlignmentValue);

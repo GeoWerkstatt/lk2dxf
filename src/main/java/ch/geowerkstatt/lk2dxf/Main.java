@@ -12,7 +12,6 @@ import org.apache.commons.cli.ParseException;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public final class Main {
@@ -55,11 +54,10 @@ public final class Main {
 
     private static void processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
-        AtomicInteger counter = new AtomicInteger();
 
         try (var dxfWriter = new DxfWriter(options.dxfFile(), 3, ObjectMapper.getLayerMappings(), "lk2dxf " + Main.VERSION)) {
             for (String xtfFile : options.xtfFiles()) {
-                try (LKMapXtfReader reader = new LKMapXtfReader(new File(xtfFile))) {
+                try (XtfStreamReader reader = new XtfStreamReader(new File(xtfFile))) {
                     ObjectMapper mapper = new ObjectMapper();
                     Stream<MappedObject> objects = mapper.mapObjects(reader.readObjects());
 
@@ -67,38 +65,7 @@ public final class Main {
                         objects = objects.filter(o -> perimeter.get().intersects(o.geometry()));
                     }
 
-                    objects.forEach(o -> {
-                        try {
-                            switch (o.layerMapping().objectClass()) {
-                                case "LKFlaeche" ->
-                                        dxfWriter.writeHatch(o.layerMapping().layer(), o.iomObject().getattrobj(o.layerMapping().geometry(), 0));
-                                case "LKLinie" ->
-                                        dxfWriter.writeLwPolyline(o.layerMapping().layer(), o.iomObject().getattrobj(o.layerMapping().geometry(), 0));
-                                case "LKPunkt" -> dxfWriter.writeBlockInsert(
-                                        o.layerMapping().layer(),
-                                        o.layerMapping().symbol(),
-                                        Optional.ofNullable(o.iomObject().getattrvalue(o.layerMapping().orientation())).map(Double::parseDouble).orElse(90.0),
-                                        o.iomObject().getattrobj(o.layerMapping().geometry(), 0));
-                                case "LKObjekt_Text" -> dxfWriter.writeText(
-                                        o.layerMapping().layer(),
-                                        o.layerMapping().font(),
-                                        o.iomObject().getattrvalue(o.layerMapping().text()),
-                                        o.iomObject().getattrvalue(o.layerMapping().hAlign()),
-                                        o.iomObject().getattrvalue(o.layerMapping().vAlign()),
-                                        Double.parseDouble(o.iomObject().getattrvalue(o.layerMapping().orientation())),
-                                        o.iomObject().getattrobj(o.layerMapping().geometry(), 0));
-
-                                default -> System.out.println("Unsupported geometry type: " + o.layerMapping().geometryType());
-                                        //throw new IllegalArgumentException("Unsupported geometry type: " + o.layerMapping().geometryType());
-                            }
-
-                            System.out.println(counter.incrementAndGet() + ": " + o.iomObject().getobjectoid() + " -> " + o.layerMapping().layer());
-                        } catch (Exception e) {
-                            System.err.println("Failed to process object: " + o.iomObject().getobjectoid());
-                            e.printStackTrace();
-                            return;
-                        }
-                    });
+                    objects.forEach(o -> o.writeToDxf(dxfWriter));
                 } catch (Exception e) {
                     System.err.println("Failed to process file: " + xtfFile);
                     e.printStackTrace();

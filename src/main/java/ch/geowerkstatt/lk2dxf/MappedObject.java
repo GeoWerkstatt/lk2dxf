@@ -8,42 +8,59 @@ import ch.interlis.iox_j.jts.Iox2jtsext;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-public record MappedObject(Geometry geometry, IomObject iomObject, LayerMapping layerMapping) {
+public record MappedObject(
+        String oid,
+        Geometry geometry,
+        IomObject iomGeometry,
+        double orientation,
+        String vAlign,
+        String hAlign,
+        String text,
+        LayerMapping layerMapping) {
     private static final GeometryFactory GEOMETRY_FACTORY = new JtsextGeometryFactory();
 
     /**
-     * Creates a new geometry object from the given {@link IomObject}.
-     * @param iomObject The {@link IomObject} to create the geometry object from.
-     * @return A geometry object containing the {@link IomObject} and its extracted {@link Geometry}.
-     * @throws IllegalArgumentException If the object tag is not supported.
+     * Creates a new {@link MappedObject} that contains all information to process the object further.
+     *
      * @throws RuntimeException If an error occurs while extracting the geometry.
      */
-    public static MappedObject create(IomObject iomObject, LayerMapping layerMapping) {
+    public MappedObject(String oid, IomObject iomGeometry, Double orientation, String vAlign, String hAlign, String text, LayerMapping layerMapping) {
+        this(oid, constructGeometry(iomGeometry, layerMapping.output(), oid), iomGeometry, orientation == null ? 90 : orientation, vAlign, hAlign, text, layerMapping);
+    }
+
+    private static Geometry constructGeometry(IomObject iomGeometry, LayerMapping.OutputType outputType, String oid) {
         try {
-            Geometry geometry = switch (layerMapping.geometryType()) {
-                case "Point" -> readPoint(iomObject, layerMapping.geometry());
-                case "Line" -> readLine(iomObject, layerMapping.geometry());
-                case "Surface" -> readSurface(iomObject, layerMapping.geometry());
-                default -> throw new IllegalArgumentException("Unsupported object tag: " + iomObject.getobjecttag());
+            return switch (outputType) {
+                case TEXT, POINT -> GEOMETRY_FACTORY.createPoint(Iox2jtsext.coord2JTS(iomGeometry));
+                case LINE -> Iox2jtsext.polyline2JTS(iomGeometry, false, 0.0);
+                case SURFACE -> Iox2jtsext.surface2JTS(iomGeometry, 0.0);
             };
-            return new MappedObject(geometry, iomObject, layerMapping);
         } catch (IoxException e) {
-            throw new RuntimeException("Error creating geometry for object with id \"" + iomObject.getobjectoid() + "\".", e);
+            throw new RuntimeException("Error creating geometry for object with id \"" + oid + "\".", e);
         }
     }
 
-    private static Geometry readPoint(IomObject iomObject, String attributeName) throws IoxException {
-        IomObject position = iomObject.getattrobj(attributeName, 0);
-        return GEOMETRY_FACTORY.createPoint(Iox2jtsext.coord2JTS(position));
-    }
+    /**
+     * Writes the object to a DXF file using the provided {@link DxfWriter}.
+     */
+    public void writeToDxf(DxfWriter dxfWriter) {
+        try {
+            if (iomGeometry == null) {
+                throw new IllegalStateException("Cannot write object to dxf without geometry.");
+            }
 
-    private static Geometry readLine(IomObject iomObject, String attributeName) throws IoxException {
-        IomObject line = iomObject.getattrobj(attributeName, 0);
-        return Iox2jtsext.polyline2JTS(line, false, 0.0);
-    }
-
-    private static Geometry readSurface(IomObject iomObject, String attributeName) throws IoxException {
-        IomObject surface = iomObject.getattrobj(attributeName, 0);
-        return Iox2jtsext.surface2JTS(surface, 0.0);
+            switch (layerMapping().output()) {
+                case SURFACE -> dxfWriter.writeHatch(layerMapping().layer(), iomGeometry);
+                case LINE -> dxfWriter.writeLwPolyline(layerMapping().layer(), iomGeometry);
+                case POINT ->
+                        dxfWriter.writeBlockInsert(layerMapping().layer(), layerMapping().symbol(), orientation, iomGeometry);
+                case TEXT ->
+                        dxfWriter.writeText(layerMapping().layer(), layerMapping().font(), text, hAlign, vAlign, orientation, layerMapping().textsize(), iomGeometry);
+                default -> throw new AssertionError("Unknown output type: " + layerMapping().output());
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to write object: " + oid() + " to dxf.");
+            e.printStackTrace();
+        }
     }
 }

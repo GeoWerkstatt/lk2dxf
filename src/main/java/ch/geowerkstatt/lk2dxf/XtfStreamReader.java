@@ -22,8 +22,7 @@ import java.util.stream.StreamSupport;
 /**
  * A reader for LKMap INTERLIS transfer files.
  */
-public final class LKMapXtfReader implements AutoCloseable {
-    private static final String BASKET_NAME = "SIA405_LKMap_2015_LV95.SIA405_LKMap";
+public final class XtfStreamReader implements AutoCloseable {
     private static final ReaderFactory READER_FACTORY = new ReaderFactory();
 
     private final IoxReader reader;
@@ -34,7 +33,7 @@ public final class LKMapXtfReader implements AutoCloseable {
      * @param xtfFile The file to read from.
      * @throws IoxException If an error occurs while creating the transfer file reader.
      */
-    public LKMapXtfReader(File xtfFile) throws IoxException {
+    public XtfStreamReader(File xtfFile) throws IoxException {
         LogEventFactory logEventFactory = new LogEventFactory();
         Settings settings = new Settings();
         this.reader = READER_FACTORY.createReader(xtfFile, logEventFactory, settings);
@@ -68,7 +67,7 @@ public final class LKMapXtfReader implements AutoCloseable {
     }
 
     /**
-     * A sequential spliterator for reading objects from the surrounding {@link LKMapXtfReader}.
+     * A sequential spliterator for reading objects from the surrounding {@link XtfStreamReader}.
      * Advancing the spliterator will read from the xtf reader and may throw an exception when reading invalid data.
      */
     private class XtfReaderSpliterator implements Spliterator<IomObject> {
@@ -88,9 +87,6 @@ public final class LKMapXtfReader implements AutoCloseable {
                         case StartBasketEvent startBasketEvent -> {
                             if (state != LKMapXtfReaderState.TRANSFER) {
                                 throw new IllegalStateException("Unexpected start basket event in state: " + state);
-                            }
-                            if (!BASKET_NAME.equals(startBasketEvent.getType())) {
-                                throw new IllegalStateException("Invalid basket type: " + startBasketEvent.getType());
                             }
                             state = LKMapXtfReaderState.BASKET;
                             System.out.println("Start basket \"" + startBasketEvent.getBid() + "\"");

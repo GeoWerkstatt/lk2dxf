@@ -9,12 +9,12 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class LKMapXtfReaderTest {
+public final class XtfStreamReaderTest {
     private static final String TEST_DIR = "src/test/data/LKMapXtfReaderTest/";
 
     @Test
     public void readValidXtf() throws Exception {
-        try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "Valid.xtf"))) {
+        try (XtfStreamReader reader = new XtfStreamReader(new File(TEST_DIR + "Valid.xtf"))) {
             String[] objectIds = reader
                     .readObjects()
                     .map(IomObject::getobjectoid)
@@ -26,7 +26,7 @@ public final class LKMapXtfReaderTest {
 
     @Test
     public void readValidXtfMultipleBaskets() throws Exception {
-        try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "ValidMultipleBaskets.xtf"))) {
+        try (XtfStreamReader reader = new XtfStreamReader(new File(TEST_DIR + "ValidMultipleBaskets.xtf"))) {
             String[] objectIds = reader
                     .readObjects()
                     .map(IomObject::getobjectoid)
@@ -38,7 +38,7 @@ public final class LKMapXtfReaderTest {
 
     @Test
     public void readXtfForWrongModel() throws Exception {
-        try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "WrongModel.xtf"))) {
+        try (XtfStreamReader reader = new XtfStreamReader(new File(TEST_DIR + "WrongModel.xtf"))) {
             Stream<IomObject> objectStream = reader.readObjects();
             assertThrows(IllegalStateException.class, objectStream::toList, "Streaming invalid data should throw an exception");
         }
@@ -46,7 +46,7 @@ public final class LKMapXtfReaderTest {
 
     @Test
     public void multipleReadsNotAllowed() throws Exception {
-        try (LKMapXtfReader reader = new LKMapXtfReader(new File(TEST_DIR + "Valid.xtf"))) {
+        try (XtfStreamReader reader = new XtfStreamReader(new File(TEST_DIR + "Valid.xtf"))) {
             reader.readObjects();
             assertThrows(IllegalStateException.class, reader::readObjects, "Multiple calls to readObjects should throw an exception");
         }
