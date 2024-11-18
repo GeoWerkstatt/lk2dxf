@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public final class XtfStreamReaderTest {
@@ -40,7 +41,7 @@ public final class XtfStreamReaderTest {
     public void readXtfForWrongModel() throws Exception {
         try (XtfStreamReader reader = new XtfStreamReader(new File(TEST_DIR + "WrongModel.xtf"))) {
             Stream<IomObject> objectStream = reader.readObjects();
-            assertThrows(IllegalStateException.class, objectStream::toList, "Streaming invalid data should throw an exception");
+            assertEquals(1, objectStream.count(), "Reading unknown data should add the objects to the stream anyway");
         }
     }
 
