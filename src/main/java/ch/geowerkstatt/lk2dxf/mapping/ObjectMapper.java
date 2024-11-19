@@ -19,7 +19,13 @@ import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iox_j.validator.Value;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -38,7 +44,7 @@ public final class ObjectMapper {
             LAYER_MAPPINGS = MappingReader.readMappings();
             TRANSFER_DESCRIPTION = getTransferDescription();
             FILTERS = analyzeLayerMappings();
-        } catch (IOException | Ili2cException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to read layer mappings.", e);
         }
     }
@@ -288,7 +294,7 @@ public final class ObjectMapper {
     /**
      * Get the {@link TransferDescription} with all models used in the layerMappings.
      */
-    private static TransferDescription getTransferDescription() throws Ili2cException {
+    private static TransferDescription getTransferDescription() throws Ili2cException, IOException, URISyntaxException {
         var requiredModels = ObjectMapper.LAYER_MAPPINGS.stream()
                 .map(LayerMapping::objectClass)
                 .flatMap(Collection::stream)
@@ -297,10 +303,36 @@ public final class ObjectMapper {
                 .collect(Collectors.toCollection(ArrayList::new));
 
         var modelManager = new IliManager();
-        var iliModelsPath = ObjectMapper.class.getResource(MODELS_RESOURCE).toString().replaceFirst("^file:/", "");
-        modelManager.setRepositories(new String[]{iliModelsPath});
-        var ili2cConfig = modelManager.getConfig(requiredModels, 0.0);
-        return Ili2c.runCompiler(ili2cConfig);
+        String iliModelsPath;
+        Path tempDir = null;
+
+        // prepare path to models from resources
+        var resourceUri = ObjectMapper.class.getResource(MODELS_RESOURCE).toURI();
+        if (resourceUri.getScheme().equals("jar")) {
+            tempDir = Files.createTempDirectory("lk2dxf_");
+            try (var fs = FileSystems.newFileSystem(resourceUri, Collections.emptyMap());
+                 var sourceFiles = Files.walk(fs.getPath(MODELS_RESOURCE)).filter(Files::isRegularFile)) {
+                for (var source : sourceFiles.toArray(Path[]::new)) {
+                    Files.copy(source, Paths.get(tempDir.toString(), source.getFileName().toString()));
+                }
+            }
+            iliModelsPath = tempDir.toString().replace("\\", "/");
+        } else {
+            iliModelsPath = resourceUri.getPath().replaceFirst("^/", "");
+        }
+
+        try {
+            System.out.println("iliModelsPath: " + iliModelsPath);
+            modelManager.setRepositories(new String[]{iliModelsPath});
+            var ili2cConfig = modelManager.getConfig(requiredModels, 0.0);
+            return Ili2c.runCompiler(ili2cConfig);
+        } finally {
+            if (tempDir != null) {
+                try (var stream = Files.walk(tempDir)) {
+                    stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                }
+            }
+        }
     }
 
     /**
