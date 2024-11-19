@@ -152,7 +152,7 @@ public final class DxfWriterTest {
             int y = 0;
             for (var vAlign : List.of("Top", "Cap", "Half", "Base", "Bottom")) {
                 for (var hAlign : List.of("Left", "Center", "Right")) {
-                    dxfWriter.writeText("Test", "arial", vAlign + "-" + hAlign, hAlign, vAlign, 90, IomObjectHelper.createCoord("0", Integer.toString(y)));
+                    dxfWriter.writeText("Test", "arial", vAlign + "-" + hAlign, hAlign, vAlign, 90, 1.25, IomObjectHelper.createCoord("0", Integer.toString(y)));
                     dxfWriter.writeCircle("Anchor", 0, y, 0.5);
                     y += 4;
                 }
@@ -168,7 +168,7 @@ public final class DxfWriterTest {
             stringWriter.getBuffer().setLength(0);
 
             for (int orientation = 0; orientation < 360; orientation += 45) {
-                dxfWriter.writeText("Test", "arial", "Orientation: " + orientation + "°", "Left", "Base", orientation, IomObjectHelper.createCoord("0", "0"));
+                dxfWriter.writeText("Test", "arial", "Orientation: " + orientation + "°", "Left", "Base", orientation, 1.25, IomObjectHelper.createCoord("0", "0"));
             }
             assertEquals("0\nTEXT\n5\n1E\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 0°\n50\n90\n100\nAcDbText\n0\nTEXT\n5\n1F\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 45°\n50\n45\n100\nAcDbText\n0\nTEXT\n5\n20\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 90°\n100\nAcDbText\n0\nTEXT\n5\n21\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 135°\n50\n315\n100\nAcDbText\n0\nTEXT\n5\n22\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 180°\n50\n270\n100\nAcDbText\n0\nTEXT\n5\n23\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 225°\n50\n225\n100\nAcDbText\n0\nTEXT\n5\n24\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 270°\n50\n180\n100\nAcDbText\n0\nTEXT\n5\n25\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nOrientation: 315°\n50\n135\n100\nAcDbText\n", stringWriter.toString());
         }
@@ -191,6 +191,6 @@ public final class DxfWriterTest {
     }
 
     private Collection<LayerMapping> createTestLayerMappings() {
-        return List.of(new LayerMapping("Test", "", "", "", 1, "", "", "", "", "TestSymbol", "", 0.25, 1.25, "arial", null));
+        return List.of(new LayerMapping("Test", List.of(), LayerMapping.OutputType.SURFACE, "", 1, "", "", "", "", "TestSymbol", "", 0.25, 1.25, "arial", null));
     }
 }

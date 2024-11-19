@@ -14,8 +14,8 @@ public final class MappingReaderTest {
         List<LayerMapping> mappings = MappingReader.readMappings();
 
         assertTrue(mappings.stream().noneMatch(m -> m.layer().isBlank()), "Layer is required");
-        assertTrue(mappings.stream().noneMatch(m -> m.objectClass().isBlank()), "ObjectType is required");
-        assertTrue(mappings.stream().noneMatch(m -> m.geometryType().isBlank()), "GeometryType is required");
+        assertTrue(mappings.stream().noneMatch(m -> m.objectClass().isEmpty()), "ObjectType is required");
+        assertTrue(mappings.stream().noneMatch(m -> m.output().toString().isBlank()), "GeometryType is required");
         assertTrue(mappings.stream().noneMatch(m -> m.geometry().isBlank()), "Geometry is required");
         assertTrue(mappings.stream().noneMatch(m -> m.mapping().isEmpty()), "Mapping is required");
         assertEquals("STILLGELEGTE-LEITUNGEN", mappings.getFirst().layer());

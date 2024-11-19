@@ -11,11 +11,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * Read and interpret the layer mapping configuration.
+ */
 public final class MappingReader {
     private static final String MAPPING_RESOURCE = "/mappings.csv";
     private static final CsvMapper MAPPER = CsvMapper
             .builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+            .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
             .build();
 
     private MappingReader() { }

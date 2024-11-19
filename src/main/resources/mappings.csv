@@ -1,49 +1,49 @@
-Layer,ObjectClass,GeometryType,Geometry,Color,Orientation,VAlign,HAlign,Text,Symbol,Linetype,Lineweight,Textsize,Font,Mapping
-STILLGELEGTE-LEITUNGEN,LKLinie,Line,Linie,8,,,,,,DashDotDot,0.25,,,Status=tot
-ABW-LINIEFWK-GENAU,LKLinie,Line,Linie,210,,,,,,Continuous,0.25,,,Objektart=Abwasser.Fernwirkkabel Lagebestimmung=genau
-ABW-LINIEFWK-UNGENAU,LKLinie,Line,Linie,210,,,,,,Dashed,0.25,,,Objektart=Abwasser.Fernwirkkabel Lagebestimmung=ungenau|unbekannt
-ABW-LINIE-GENAU,LKLinie,Line,Linie,210,,,,,,Continuous,0.25,,,Objektart=Abwasser.Haltung_Kanal|Abwasser.Schutzrohr Lagebestimmung=genau
-ABW-LINIE-UNGENAU,LKLinie,Line,Linie,210,,,,,,Dashed,0.25,,,Objektart=Abwasser.Haltung_Kanal|Abwasser.Schutzrohr Lagebestimmung=ungenau|unbekannt
-ABW-FLAECHE,LKFlaeche,Surface,Flaeche,210,,,,,,,,,,Objektart=Abwasser
-ABW-PUNKT,LKPunkt,Point,SymbolPos,210,SymbolOri,,,,BAW15,,,,,Objektart=Abwasser
-ABW-TEXT,LKObjekt_Text,Point,TextPos,210,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=Abwasser
-ELE-LINIE-GENAU,LKLinie,Line,Linie,10,,,,,,Continuous,0.25,,,Objektart=Elektrizitaet.Trasse.unterirdisch Lagebestimmung=genau
-ELE-LINIE-UNGENAU,LKLinie,Line,Linie,10,,,,,,Dashed,0.25,,,Objektart=Elektrizitaet.Trasse.unterirdisch Lagebestimmung=ungenau|unbekannt
-ELE-LINIE-OBERIRDISCH,LKLinie,Line,Linie,10,,,,,,Continuous,0.25,,,Objektart=Elektrizitaet.Trasse.oberirdisch|Elektrizitaet.AnkerStrebe
-ELE-FLAECHE,LKFlaeche,Surface,Flaeche,10,,,,,,,,,,Objektart=Elektrizitaet
-ELE-PUNKT,LKPunkt,Point,SymbolPos,10,SymbolOri,,,,BEW978,,,,,Objektart=Elektrizitaet
-ELE-TEXT,LKObjekt_Text,Point,TextPos,10,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=Elektrizitaet
-GAS-LINIEFWK-GENAU,LKLinie,Line,Linie,22,,,,,,Continuous,0.25,,,Objektart=Gas.Fernwirkkabel Labebestimmung=genau
-GAS-LINIEFWK-UNGENAU,LKLinie,Line,Linie,22,,,,,,Dashed,0.25,,,Objektart=Gas.Fernwirkkabel Labebestimmung=ungenau|unbekannt
-GAS-LINIE-GENAU,LKLinie,Line,Linie,22,,,,,,Continuous,0.25,,,Objektart=Gas.Leitung|Gas.Schutzrohr Labebestimmung=genau
-GAS-LINIE-UNGENAU,LKLinie,Line,Linie,22,,,,,,Dashed,0.25,,,Objektart=Gas.Leitung|Gas.Schutzrohr Labebestimmung=ungenau|unbekannt
-GAS-FLAECHE,LKFlaeche,Surface,Flaeche,22,,,,,,,,,,Objektart=Gas
-GAS-PUNKT,LKPunkt,Point,SymbolPos,22,SymbolOri,,,,BGA957,,,,,Objektart=Gas
-GAS-TEXT,LKObjekt_Text,Point,TextPos,22,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=Gas
-WAS-LINIEFWK-GENAU,LKLinie,Line,Linie,170,,,,,,Continuous,0.25,,,Objektart=Wasser.Fernwirkkabel Lagebestimmung=genau
-WAS-LINIEFWK-UNGENAU,LKLinie,Line,Linie,170,,,,,,Dashed,0.25,,,Objektart=Wasser.Fernwirkkabel Lagebestimmung=ungenau|unbekannt
-WAS-LINIE-GENAU,LKLinie,Line,Linie,170,,,,,,Continuous,0.25,,,Objektart=Wasser.Leitung|Wasser.Schutzrohr Lagebestimmung=genau
-WAS-LINIE-UNGENAU,LKLinie,Line,Linie,170,,,,,,Dashed,0.25,,,Objektart=Wasser.Leitung|Wasser.Schutzrohr Lagebestimmung=ungenau|unbekannt
-WAS-FLAECHE,LKFlaeche,Surface,Flaeche,170,,,,,,,,,,Objektart=Wasser
-WAS-PUNKT,LKPunkt,Point,SymbolPos,170,SymbolOri,,,,BWA15,,,,,Objektart=Wasser
-WAS-TEXT,LKObjekt_Text,Point,TextPos,170,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=Wasser
-FER-LINIEFWK-GENAU,LKLinie,Line,Linie,30,,,,,,Continuous,0.25,,,Objektart=Fernwaerme.Fernwirkkabel Lagebestimmung=genau
-FER-LINIEFWK-UNGENAU,LKLinie,Line,Linie,30,,,,,,Dashed,0.25,,,Objektart=Fernwaerme.Fernwirkkabel Lagebestimmung=ungenau|unbekannt
-FER-LINIE-GENAU,LKLinie,Line,Linie,30,,,,,,Continuous,0.25,,,Objektart=Fernwaerme.Trasse Lagebestimmung=genau
-FER-LINIE-UNGENAU,LKLinie,Line,Linie,30,,,,,,Dashed,0.25,,,Objektart=Fernwaerme.Trasse Lagebestimmung=ungenau|unbekannt
-FER-FLAECHE,LKFlaeche,Surface,Flaeche,30,,,,,,,,,,Objektart=Fernwaerme
-FER-PUNKT,LKPunkt,Point,SymbolPos,30,SymbolOri,,,,BWA965,,,,,Objektart=Fernwaerme
-FER-TEXT,LKObjekt_Text,Point,TextPos,30,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=Fernwaerme
-KOM-LINIE-GENAU,LKLinie,Line,Linie,80,,,,,,Continuous,0.25,,,Objektart=Kommunikation.Trasse.unterirdisch Lagebestimmung=genau
-KOM-LINIE-UNGENAU,LKLinie,Line,Linie,80,,,,,,Dashed,0.25,,,Objektart=Kommunikation.Trasse.unterirdisch Lagebestimmung=ungenau|unbekannt
-KOM-LINIE-OBERIRDISCH,LKLinie,Line,Linie,80,,,,,,Continuous,0.25,,,Objektart=Kommunikation.Trasse.oberirdisch
-KOM-FLAECHE,LKFlaeche,Surface,Flaeche,80,,,,,,,,,,Objektart=Kommunikation
-KOM-PUNKT,LKPunkt,Point,SymbolPos,80,SymbolOri,,,,BEW15,,,,,Objektart=Kommunikation
-KOM-TEXT,LKObjekt_Text,Point,TextPos,80,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=Kommunikation
-WEI-LINIEFWK-GENAU,LKLinie,Line,Linie,50,,,,,,Continuous,0.25,,,Objektart=weitereMedien.Fernwirkkabel Lagebestimmung=genau
-WEI-LINIEFWK-UNGENAU,LKLinie,Line,Linie,50,,,,,,Dashed,0.25,,,Objektart=weitereMedien.Fernwirkkabel Lagebestimmung=ungenau|unbekannt
-WEI-LINIE-GENAU,LKLinie,Line,Linie,50,,,,,,Continuous,0.25,,,Objektart=weitereMedien.Leitung|weitereMedien.Schutzrohr Lagebestimmung=genau
-WEI-LINIE-UNGENAU,LKLinie,Line,Linie,50,,,,,,Dashed,0.25,,,Objektart=weitereMedien.Leitung|weitereMedien.Schutzrohr Lagebestimmung=ungenau|unbekannt
-WEI-FLAECHE,LKFlaeche,Surface,Flaeche,50,,,,,,,,,,Objektart=weitereMedien
-WEI-PUNKT,LKPunkt,Point,SymbolPos,50,SymbolOri,,,,BEW15,,,,,Objektart=weitereMedien
-WEI-TEXT,LKObjekt_Text,Point,TextPos,50,TextOri,TextVAli,TextHAli,Textinhalt,,,,1.25,Cadastra,Objektart=weitereMedien
+Layer,ObjectClass,Mapping,Output,Geometry,Orientation,VAlign,HAlign,Text,Color,Symbol,Linetype,Lineweight,Textsize,Font
+STILLGELEGTE-LEITUNGEN,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Status=tot,Line,Linie,,,,,8,,DashDotDot,0.25,,
+ABW-LINIEFWK-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Abwasser.Fernwirkkabel Lagebestimmung=genau,Line,Linie,,,,,210,,Continuous,0.25,,
+ABW-LINIEFWK-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Abwasser.Fernwirkkabel Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,210,,Dashed,0.25,,
+ABW-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Abwasser.Haltung_Kanal|Abwasser.Schutzrohr Lagebestimmung=genau,Line,Linie,,,,,210,,Continuous,0.25,,
+ABW-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Abwasser.Haltung_Kanal|Abwasser.Schutzrohr Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,210,,Dashed,0.25,,
+ABW-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=Abwasser,Surface,Flaeche,,,,,210,,,,,
+ABW-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=Abwasser,Point,SymbolPos,SymbolOri,,,,210,PointMarker,,,,
+ABW-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=Abwasser,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,210,,,,1.25,Cadastra
+ELE-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Elektrizitaet.Trasse.unterirdisch Lagebestimmung=genau,Line,Linie,,,,,10,,Continuous,0.25,,
+ELE-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Elektrizitaet.Trasse.unterirdisch Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,10,,Dashed,0.25,,
+ELE-LINIE-OBERIRDISCH,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Elektrizitaet.Trasse.oberirdisch|Elektrizitaet.AnkerStrebe,Line,Linie,,,,,10,,Continuous,0.25,,
+ELE-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=Elektrizitaet,Surface,Flaeche,,,,,10,,,,,
+ELE-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=Elektrizitaet,Point,SymbolPos,SymbolOri,,,,10,PointMarker,,,,
+ELE-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=Elektrizitaet,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,10,,,,1.25,Cadastra
+GAS-LINIEFWK-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Gas.Fernwirkkabel Lagebestimmung=genau,Line,Linie,,,,,22,,Continuous,0.25,,
+GAS-LINIEFWK-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Gas.Fernwirkkabel Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,22,,Dashed,0.25,,
+GAS-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Gas.Leitung|Gas.Schutzrohr Lagebestimmung=genau,Line,Linie,,,,,22,,Continuous,0.25,,
+GAS-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Gas.Leitung|Gas.Schutzrohr Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,22,,Dashed,0.25,,
+GAS-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=Gas,Surface,Flaeche,,,,,22,,,,,
+GAS-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=Gas,Point,SymbolPos,SymbolOri,,,,22,PointMarker,,,,
+GAS-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=Gas,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,22,,,,1.25,Cadastra
+WAS-LINIEFWK-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Wasser.Fernwirkkabel Lagebestimmung=genau,Line,Linie,,,,,170,,Continuous,0.25,,
+WAS-LINIEFWK-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Wasser.Fernwirkkabel Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,170,,Dashed,0.25,,
+WAS-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Wasser.Leitung|Wasser.Schutzrohr Lagebestimmung=genau,Line,Linie,,,,,170,,Continuous,0.25,,
+WAS-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Wasser.Leitung|Wasser.Schutzrohr Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,170,,Dashed,0.25,,
+WAS-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=Wasser,Surface,Flaeche,,,,,170,,,,,
+WAS-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=Wasser,Point,SymbolPos,SymbolOri,,,,170,PointMarker,,,,
+WAS-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=Wasser,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,170,,,,1.25,Cadastra
+FER-LINIEFWK-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Fernwaerme.Fernwirkkabel Lagebestimmung=genau,Line,Linie,,,,,30,,Continuous,0.25,,
+FER-LINIEFWK-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Fernwaerme.Fernwirkkabel Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,30,,Dashed,0.25,,
+FER-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Fernwaerme.Trasse Lagebestimmung=genau,Line,Linie,,,,,30,,Continuous,0.25,,
+FER-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Fernwaerme.Trasse Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,30,,Dashed,0.25,,
+FER-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=Fernwaerme,Surface,Flaeche,,,,,30,,,,,
+FER-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=Fernwaerme,Point,SymbolPos,SymbolOri,,,,30,PointMarker,,,,
+FER-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=Fernwaerme,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,30,,,,1.25,Cadastra
+KOM-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Kommunikation.Trasse.unterirdisch Lagebestimmung=genau,Line,Linie,,,,,80,,Continuous,0.25,,
+KOM-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Kommunikation.Trasse.unterirdisch Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,80,,Dashed,0.25,,
+KOM-LINIE-OBERIRDISCH,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=Kommunikation.Trasse.oberirdisch,Line,Linie,,,,,80,,Continuous,0.25,,
+KOM-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=Kommunikation,Surface,Flaeche,,,,,80,,,,,
+KOM-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=Kommunikation,Point,SymbolPos,SymbolOri,,,,80,PointMarker,,,,
+KOM-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=Kommunikation,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,80,,,,1.25,Cadastra
+WEI-LINIEFWK-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=weitereMedien.Fernwirkkabel Lagebestimmung=genau,Line,Linie,,,,,50,,Continuous,0.25,,
+WEI-LINIEFWK-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=weitereMedien.Fernwirkkabel Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,50,,Dashed,0.25,,
+WEI-LINIE-GENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=weitereMedien.Leitung|weitereMedien.Schutzrohr Lagebestimmung=genau,Line,Linie,,,,,50,,Continuous,0.25,,
+WEI-LINIE-UNGENAU,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKLinie|SIA405_LKMap_2015.SIA405_LKMap.LKLinie|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKLIGNE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKLIGNE,Objektart=weitereMedien.Leitung|weitereMedien.Schutzrohr Lagebestimmung=ungenau|unbekannt,Line,Linie,,,,,50,,Dashed,0.25,,
+WEI-FLAECHE,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015.SIA405_LKMap.LKFlaeche|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKSURFACE|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKSURFACE,Objektart=weitereMedien,Surface,Flaeche,,,,,50,,,,,
+WEI-PUNKT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015.SIA405_LKMap.LKPunkt|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKPOINT|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKPOINT,Objektart=weitereMedien,Point,SymbolPos,SymbolOri,,,,50,PointMarker,,,,
+WEI-TEXT,SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015.SIA405_LKMap.LKObjekt_Text|SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte|SIA405_LKMap_2015_f.SIA405_LKMap_f.LKOBJET_Texte,LKObjektRef->Objektart=weitereMedien,Text,TextPos,TextOri,TextVAli,TextHAli,Textinhalt,50,,,,1.25,Cadastra

@@ -1,6 +1,6 @@
 package ch.geowerkstatt.lk2dxf.mapping;
 
-import ch.geowerkstatt.lk2dxf.LKMapXtfReader;
+import ch.geowerkstatt.lk2dxf.XtfStreamReader;
 import ch.interlis.iom.IomObject;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ public final class ObjectMapperTest {
 
     @Test
     public void mapObject() throws Exception {
-        try (LKMapXtfReader xtfReader = new LKMapXtfReader(new File(TEST_FILE))) {
+        try (XtfStreamReader xtfReader = new XtfStreamReader(new File(TEST_FILE))) {
             ObjectMapper mapper = new ObjectMapper();
 
             List<IomObject> objects = xtfReader.readObjects().toList();
