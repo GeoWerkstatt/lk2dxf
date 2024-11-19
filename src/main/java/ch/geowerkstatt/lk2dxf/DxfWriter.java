@@ -18,6 +18,7 @@ import java.util.stream.Stream;
  * @see <a href="https://ezdxf.readthedocs.io/en/stable/index.html">ezdxf Documentation</a> (additional info autout DXF format)
  */
 public final class DxfWriter implements AutoCloseable {
+    private static final String DEFAULT_LAYER = "0";
     private final DecimalFormat decimalFormat;
     private final Writer dxfWriter;
     private int handle = 1;
@@ -67,7 +68,7 @@ public final class DxfWriter implements AutoCloseable {
 
     private void prepareDxfForWritingEntities(Collection<LayerMapping> layerMappings, String comment) throws IOException {
         var layers = new LinkedHashMap<String, ContentWriter>(layerMappings.size());
-        layers.put("0", () -> writeLayer("0", "Continuous", 0));
+        layers.put(DEFAULT_LAYER, () -> writeLayer(DEFAULT_LAYER, "Continuous", 0));
         for (var mapping : layerMappings) {
             layers.putIfAbsent(mapping.layer(), () -> writeLayer(mapping.layer(), mapping.linetype(), mapping.color()));
         }
@@ -79,7 +80,7 @@ public final class DxfWriter implements AutoCloseable {
                         () -> writeBlock("*Model_Space"),
                         () -> writeBlock("*Paper_Space")
                 ), symbols.stream()
-                        .map(s -> (ContentWriter) (() -> writeBlock(s, () -> writeCircle("0", 0, 0, 0.5)))))
+                        .map(s -> (ContentWriter) (() -> writeBlock(s, () -> writeCircle(DEFAULT_LAYER, 0, 0, 0.5)))))
                 .toArray(ContentWriter[]::new);
 
         if (comment != null) {
@@ -379,7 +380,7 @@ public final class DxfWriter implements AutoCloseable {
     private void writeBlock(String name, ContentWriter... writeContent) throws IOException {
         writeElement(0, "BLOCK");
         writeElement(5, getNextHandle());
-        writeElement(8, "0"); // layer
+        writeElement(8, DEFAULT_LAYER); // layer
         writeElement(100, "AcDbEntity");
         writeElement(100, "AcDbBlockBegin");
         writeElement(2, name);
@@ -392,7 +393,7 @@ public final class DxfWriter implements AutoCloseable {
         }
         writeElement(0, "ENDBLK");
         writeElement(5, getNextHandle());
-        writeElement(8, "0"); // layer
+        writeElement(8, DEFAULT_LAYER); // layer
         writeElement(100, "AcDbEntity");
         writeElement(100, "AcDbBlockEnd");
     }
