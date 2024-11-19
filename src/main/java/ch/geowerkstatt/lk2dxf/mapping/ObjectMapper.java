@@ -308,17 +308,21 @@ public final class ObjectMapper {
 
         // prepare path to models from resources
         var resourceUri = ObjectMapper.class.getResource(MODELS_RESOURCE).toURI();
+        tempDir = Files.createTempDirectory("lk2dxf_");
+        iliModelsPath = tempDir.toString().replace("\\", "/");
         if (resourceUri.getScheme().equals("jar")) {
-            tempDir = Files.createTempDirectory("lk2dxf_");
             try (var fs = FileSystems.newFileSystem(resourceUri, Collections.emptyMap());
                  var sourceFiles = Files.walk(fs.getPath(MODELS_RESOURCE)).filter(Files::isRegularFile)) {
                 for (var source : sourceFiles.toArray(Path[]::new)) {
                     Files.copy(source, Paths.get(tempDir.toString(), source.getFileName().toString()));
                 }
             }
-            iliModelsPath = tempDir.toString().replace("\\", "/");
         } else {
-            iliModelsPath = resourceUri.getPath().replaceFirst("^/", "");
+            try (var sourceFiles = Files.walk(Paths.get(resourceUri))) {
+                for (var source : sourceFiles.toArray(Path[]::new)) {
+                    Files.copy(source, Paths.get(tempDir.toString(), source.getFileName().toString()));
+                }
+            }
         }
 
         try {
@@ -327,10 +331,8 @@ public final class ObjectMapper {
             var ili2cConfig = modelManager.getConfig(requiredModels, 0.0);
             return Ili2c.runCompiler(ili2cConfig);
         } finally {
-            if (tempDir != null) {
-                try (var stream = Files.walk(tempDir)) {
-                    stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-                }
+            try (var stream = Files.walk(tempDir)) {
+                stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
         }
     }
