@@ -56,16 +56,16 @@ public final class ObjectMapper {
         var mappers = new ArrayList<Mapper>();
         for (LayerMapping layerMapping : ObjectMapper.LAYER_MAPPINGS) {
             for (String objectClass : layerMapping.objectClass()) {
-                var viewable = TRANSFER_DESCRIPTION.getElement(objectClass);
-                if (viewable == null) {
-                    throw new IllegalArgumentException("No viewable found for object with id \"" + objectClass + "\".");
+                var element = TRANSFER_DESCRIPTION.getElement(objectClass);
+                if (element == null) {
+                    throw new IllegalArgumentException("No element found for object with id \"" + objectClass + "\".");
                 }
-                if (!(viewable instanceof Table classDef)) {
-                    throw new IllegalArgumentException("Viewable is not an AbstractClassDef for object with id \"" + objectClass + "\".");
+                if (!(element instanceof Table classDef)) {
+                    throw new IllegalArgumentException("Element is not an AbstractClassDef for object with id \"" + objectClass + "\".");
                 }
 
                 var filter = new ArrayList<Filter>();
-                filter.add(new TagFilter(viewable.getScopedName()));
+                filter.add(new TagFilter(classDef.getScopedName()));
 
                 for (var baseAttributeName : layerMapping.mapping().keySet()) {
                     var values = layerMapping.mapping().get(baseAttributeName);
@@ -357,13 +357,13 @@ public final class ObjectMapper {
     }
 
     private Optional<MappedObject> mapObject(IomObject iomObject, boolean unresolvedReferencesAllowed) {
-        var viewable = TRANSFER_DESCRIPTION.getElement(iomObject.getobjecttag());
-        if (viewable == null) {
-            System.out.println("No viewable found for object with id \"" + iomObject.getobjectoid() + "\".");
+        var element = TRANSFER_DESCRIPTION.getElement(iomObject.getobjecttag());
+        if (element == null) {
+            System.out.println("No element found for object with id \"" + iomObject.getobjectoid() + "\".");
             return Optional.empty();
         }
-        if (!(viewable instanceof AbstractClassDef<?> classDef)) {
-            System.out.println("Viewable is not an AbstractClassDef for object with id \"" + iomObject.getobjectoid() + "\".");
+        if (!(element instanceof AbstractClassDef<?> classDef)) {
+            System.out.println("Element is not an AbstractClassDef for object with id \"" + iomObject.getobjectoid() + "\".");
             return Optional.empty();
         }
 
