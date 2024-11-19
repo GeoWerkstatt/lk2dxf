@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * A reader for LKMap INTERLIS transfer files.
+ * A reader for INTERLIS transfer files.
  */
 public final class XtfStreamReader implements AutoCloseable {
     private static final ReaderFactory READER_FACTORY = new ReaderFactory();
