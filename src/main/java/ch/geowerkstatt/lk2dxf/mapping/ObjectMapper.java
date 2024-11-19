@@ -302,14 +302,10 @@ public final class ObjectMapper {
                 .distinct()
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        var modelManager = new IliManager();
-        String iliModelsPath;
-        Path tempDir = null;
-
         // prepare path to models from resources
         var resourceUri = ObjectMapper.class.getResource(MODELS_RESOURCE).toURI();
-        tempDir = Files.createTempDirectory("lk2dxf_");
-        iliModelsPath = tempDir.toString().replace("\\", "/");
+        var tempDir = Files.createTempDirectory("lk2dxf_");
+        var iliModelsPath = tempDir.toString().replace("\\", "/");
         if (resourceUri.getScheme().equals("jar")) {
             try (var fs = FileSystems.newFileSystem(resourceUri, Collections.emptyMap());
                  var sourceFiles = Files.walk(fs.getPath(MODELS_RESOURCE)).filter(Files::isRegularFile)) {
@@ -327,6 +323,7 @@ public final class ObjectMapper {
 
         try {
             System.out.println("iliModelsPath: " + iliModelsPath);
+            var modelManager = new IliManager();
             modelManager.setRepositories(new String[]{iliModelsPath});
             var ili2cConfig = modelManager.getConfig(requiredModels, 0.0);
             return Ili2c.runCompiler(ili2cConfig);
