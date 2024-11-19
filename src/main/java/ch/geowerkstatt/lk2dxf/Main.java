@@ -77,7 +77,7 @@ public final class Main {
                                 case "LKPunkt" -> dxfWriter.writeBlockInsert(
                                         o.layerMapping().layer(),
                                         o.layerMapping().symbol(),
-                                        Double.parseDouble(o.iomObject().getattrvalue(o.layerMapping().orientation())),
+                                        Optional.ofNullable(o.iomObject().getattrvalue(o.layerMapping().orientation())).map(Double::parseDouble).orElse(90.0),
                                         o.iomObject().getattrobj(o.layerMapping().geometry(), 0));
                                 case "LKObjekt_Text" -> dxfWriter.writeText(
                                         o.layerMapping().layer(),
