@@ -288,6 +288,7 @@ public final class DxfWriter implements AutoCloseable {
         var isDefaultAlignment = hAlignmentValue == 0 && vAlignmentValue == 0;
 
         orientation = convertOrientation(orientation);
+        text = text.replace("\n", "\\U+000A").replace("\r", "\\U+000D").replace("\t", "\\U+0009");
 
         writeElement(0, "TEXT");
         writeElement(5, getNextHandle());

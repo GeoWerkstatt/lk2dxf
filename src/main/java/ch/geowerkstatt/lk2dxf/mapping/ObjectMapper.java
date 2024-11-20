@@ -33,30 +33,37 @@ import java.util.stream.Stream;
 
 public final class ObjectMapper {
     private static final String MODELS_RESOURCE = "/models";
-    private static final List<LayerMapping> LAYER_MAPPINGS;
-    private static final TransferDescription TRANSFER_DESCRIPTION;
+    private final List<LayerMapping> layerMappings;
+    private final TransferDescription transferDescription;
 
-    private static final Map<AbstractClassDef<?>, Set<PathElement>> CACHE_REQUIREMENTS = new HashMap<AbstractClassDef<?>, Set<PathElement>>();
-    private static final List<Mapper> FILTERS;
+    private final Map<AbstractClassDef<?>, Set<PathElement>> cacheRequirements = new HashMap<>();
+    private final List<Mapper> filters = new ArrayList<>();
 
-    static {
-        try {
-            LAYER_MAPPINGS = MappingReader.readMappings();
-            TRANSFER_DESCRIPTION = getTransferDescription();
-            FILTERS = analyzeLayerMappings();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to read layer mappings.", e);
-        }
+    /**
+     * Create a new {@link ObjectMapper} with the default mappings.
+     */
+    public ObjectMapper() throws IOException, URISyntaxException, Ili2cException {
+        this(MappingReader.readMappings());
     }
 
-    private final Map<String, IomObject> objectCache = new HashMap<>();
-    private final Set<IomObject> objectsWithUnresolvedRef = new HashSet<>();
+    /**
+     * Create a new {@link ObjectMapper} with the given layer mappings.
+     *
+     * @param layerMappings The layer mappings to use.
+     */
+    public ObjectMapper(List<LayerMapping> layerMappings) throws IOException, URISyntaxException, Ili2cException {
+        this.layerMappings = layerMappings;
+        transferDescription = getTransferDescription(layerMappings);
+        analyzeLayerMappings();
+    }
 
-    private static List<Mapper> analyzeLayerMappings() {
-        var mappers = new ArrayList<Mapper>();
-        for (LayerMapping layerMapping : ObjectMapper.LAYER_MAPPINGS) {
+    /**
+     * Analyze the layer mappings and populate the {@link #filters} and {@link #cacheRequirements}.
+     */
+    private void analyzeLayerMappings() {
+        for (LayerMapping layerMapping : layerMappings) {
             for (String objectClass : layerMapping.objectClass()) {
-                var element = TRANSFER_DESCRIPTION.getElement(objectClass);
+                var element = transferDescription.getElement(objectClass);
                 if (element == null) {
                     throw new IllegalArgumentException("No element found for object with id \"" + objectClass + "\".");
                 }
@@ -70,10 +77,10 @@ public final class ObjectMapper {
                 for (var baseAttributeName : layerMapping.mapping().keySet()) {
                     var values = layerMapping.mapping().get(baseAttributeName);
                     var pathElements = getTranslatedPath(classDef, Arrays.asList(baseAttributeName.split("->")));
-                    analyzeCacheRequirements(pathElements, CACHE_REQUIREMENTS);
+                    analyzeCacheRequirements(pathElements, cacheRequirements);
                     var type = ((AttributeDef) pathElements.getLast().element).getDomainResolvingAliases();
                     if (!(type instanceof EnumerationType enumerationType)) {
-                        throw new IllegalArgumentException("Only enumeratino types supported" + baseAttributeName);
+                        throw new IllegalArgumentException("Only enumeration types supported: " + baseAttributeName);
                     }
 
                     var attrFilter = new PathMatcher(pathElements, values.stream().map(v -> getTranslatedEnumValue(enumerationType, v)).toList());
@@ -84,37 +91,36 @@ public final class ObjectMapper {
                 var mapper = switch (layerMapping.output()) {
                     case SURFACE, LINE -> new Mapper(filter,
                             layerMapping,
-                            getTranslatedPath(classDef, layerMapping.geometry()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.geometry()),
                             null,
                             null,
                             null,
                             null);
                     case TEXT -> new Mapper(filter,
                             layerMapping,
-                            getTranslatedPath(classDef, layerMapping.geometry()),
-                            getTranslatedPath(classDef, layerMapping.orientation()),
-                            getTranslatedPath(classDef, layerMapping.vAlign()),
-                            getTranslatedPath(classDef, layerMapping.hAlign()),
-                            getTranslatedPath(classDef, layerMapping.text()));
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.geometry()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.orientation()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.vAlign()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.hAlign()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.text()));
                     case POINT -> new Mapper(filter,
                             layerMapping,
-                            getTranslatedPath(classDef, layerMapping.geometry()),
-                            getTranslatedPath(classDef, layerMapping.orientation()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.geometry()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.orientation()),
                             null,
                             null,
                             null);
                 };
-                mappers.add(mapper);
+                filters.add(mapper);
             }
         }
-        return mappers;
     }
 
     /**
      * Get the layer mappings as an immutable list.
      */
-    public static List<LayerMapping> getLayerMappings() {
-        return Collections.unmodifiableList(LAYER_MAPPINGS);
+    public List<LayerMapping> getLayerMappings() {
+        return Collections.unmodifiableList(layerMappings);
     }
 
     private static boolean matchesEnumSubValue(List<String> allowedValues, String attrValue) {
@@ -180,7 +186,7 @@ public final class ObjectMapper {
     }
 
     /**
-     * Analyze a path for references that need a referenced object in the cache. Update the {@link #CACHE_REQUIREMENTS} accordingly.
+     * Analyze a path for references that need a referenced object in the cache. Update the {@link #cacheRequirements} accordingly.
      */
     private static void analyzeCacheRequirements(List<PathElement> path, Map<AbstractClassDef<?>, Set<PathElement>> cacheRequirements) {
         for (int i = 0; i < path.size(); i++) {
@@ -197,10 +203,13 @@ public final class ObjectMapper {
     }
 
     /**
+     * Get the translated path elements for the given attribute path. Analyzes the path for cache requirements.
      * @see #getTranslatedPath(AbstractClassDef, List)
      */
-    private static List<PathElement> getTranslatedPath(AbstractClassDef<?> viewable, String basePathElements) {
-        return getTranslatedPath(viewable, Arrays.asList(basePathElements.split("->")));
+    private List<PathElement> getAndAnalyzeTranslatedPath(AbstractClassDef<?> viewable, String basePathElements) {
+        var path = getTranslatedPath(viewable, Arrays.asList(basePathElements.split("->")));
+        analyzeCacheRequirements(path, cacheRequirements);
+        return path;
     }
 
     /**
@@ -249,12 +258,13 @@ public final class ObjectMapper {
     private static AbstractLeafElement getTranslatedAttributeOrRole(Viewable<?> viewable, String attributeBaseName) {
         for (ExtendableContainer<?> extension : viewable.getExtensions()) {
             for (var it = ((Viewable<?>) extension).getAttributesAndRoles2(); it.hasNext();) {
-                var result = switch (it.next().obj) {
+                var element = it.next().obj;
+                var result = switch (element) {
                     case AttributeDef attributeDef ->
                             (attributeDef.getTranslationOfOrSame().getName().equals(attributeBaseName) ? attributeDef : null);
                     case RoleDef roleDef ->
                             (roleDef.getTranslationOfOrSame().getName().equals(attributeBaseName) ? roleDef : null);
-                    default -> throw new IllegalStateException("Unexpected value: " + it.next().obj);
+                    default -> throw new IllegalStateException("Unexpected value: " + element);
                 };
 
                 if (result != null) {
@@ -294,8 +304,8 @@ public final class ObjectMapper {
     /**
      * Get the {@link TransferDescription} with all models used in the layerMappings.
      */
-    private static TransferDescription getTransferDescription() throws Ili2cException, IOException, URISyntaxException {
-        var requiredModels = ObjectMapper.LAYER_MAPPINGS.stream()
+    private static TransferDescription getTransferDescription(List<LayerMapping> layerMappings) throws Ili2cException, IOException, URISyntaxException {
+        var requiredModels = layerMappings.stream()
                 .map(LayerMapping::objectClass)
                 .flatMap(Collection::stream)
                 .map(c -> c.substring(0, c.indexOf('.')))
@@ -341,11 +351,14 @@ public final class ObjectMapper {
      * @return A stream of mapped objects.
      */
     public Stream<MappedObject> mapObjects(Stream<IomObject> iomObjects) {
+        final Map<String, IomObject> objectCache = new HashMap<>();
+        final Set<IomObject> objectsWithUnresolvedRef = new HashSet<>();
+
         // Combine streams using flatMap instead of concat to process objectsWithRef
         // after all objects have been processed by the first stream.
         var combinedStream = Stream.<Supplier<Stream<Optional<MappedObject>>>>of(
-                () -> iomObjects.map(b -> mapObject(b, true)),
-                () -> objectsWithUnresolvedRef.stream().map(b -> mapObject(b, false))
+                () -> iomObjects.map(b -> mapObject(b, objectCache, objectsWithUnresolvedRef, true)),
+                () -> objectsWithUnresolvedRef.stream().map(b -> mapObject(b, objectCache, objectsWithUnresolvedRef, false))
         ).flatMap(Supplier::get);
 
         return combinedStream
@@ -353,8 +366,8 @@ public final class ObjectMapper {
                 .map(Optional::get);
     }
 
-    private Optional<MappedObject> mapObject(IomObject iomObject, boolean unresolvedReferencesAllowed) {
-        var element = TRANSFER_DESCRIPTION.getElement(iomObject.getobjecttag());
+    private Optional<MappedObject> mapObject(IomObject iomObject, Map<String, IomObject> objectCache, Set<IomObject> objectsWithUnresolvedRef, boolean unresolvedReferencesAllowed) {
+        var element = transferDescription.getElement(iomObject.getobjecttag());
         if (element == null) {
             System.out.println("No element found for object with id \"" + iomObject.getobjectoid() + "\".");
             return Optional.empty();
@@ -365,7 +378,7 @@ public final class ObjectMapper {
         }
 
         // cache part of the object if necessary
-        var pathElements = CACHE_REQUIREMENTS.get(classDef);
+        var pathElements = cacheRequirements.get(classDef);
         if (pathElements != null) {
             IomObject cacheObject = new Iom_jObject(iomObject.getobjecttag(), iomObject.getobjectoid());
             for (var pathElement : pathElements) {
@@ -382,29 +395,37 @@ public final class ObjectMapper {
             objectCache.put(iomObject.getobjectoid(), cacheObject);
         }
 
-        return FILTERS.stream()
-                .filter(filter -> filter.filter.stream().allMatch((f) ->
-                        switch (f.matches(iomObject, objectCache)) {
-                            case UNRESOLVED_REF -> {
-                                if (unresolvedReferencesAllowed) {
-                                    objectsWithUnresolvedRef.add(iomObject);
-                                    yield false;
-                                } else {
-                                    throw new IllegalStateException("Unresolved reference in object with id \"" + iomObject.getobjectoid() + "\".");
-                                }
-                            }
-                            case MATCH -> true;
-                            case NO_MATCH -> false;
-                        }))
-                .findFirst()
-                .map(filter -> new MappedObject(
-                        iomObject.getobjectoid(),
-                        Optional.ofNullable(resolve(iomObject, filter.geometry(), objectCache).getComplexObjects()).map(Collection::iterator).map(Iterator::next).orElse(null),
-                        Optional.ofNullable(resolve(iomObject, filter.orientation(), objectCache).getValue()).map(Double::parseDouble).orElse(null),
-                        resolve(iomObject, filter.vAlign(), objectCache).getValue(),
-                        resolve(iomObject, filter.hAlign(), objectCache).getValue(),
-                        resolve(iomObject, filter.text(), objectCache).getValue(),
-                        filter.mapping()));
+        mapperLoop:
+        for (var mapper : filters) {
+            for (var filter : mapper.filter) {
+                switch (filter.matches(iomObject, objectCache)) {
+                    case UNRESOLVED_REF -> {
+                        if (unresolvedReferencesAllowed) {
+                            objectsWithUnresolvedRef.add(iomObject);
+                            return Optional.empty();
+                        } else {
+                            throw new IllegalStateException("Unresolved reference in object with id \"" + iomObject.getobjectoid() + "\".");
+                        }
+                    }
+                    case NO_MATCH -> {
+                        continue mapperLoop;
+                    }
+                    default -> { } // MATCH, continue with next filter
+                }
+            }
+            return Optional.of(new MappedObject(
+                    iomObject.getobjectoid(),
+                    Optional.ofNullable(resolve(iomObject, mapper.geometry(), objectCache).getComplexObjects()).map(Collection::iterator).map(Iterator::next).orElse(null),
+                    Optional.ofNullable(resolve(iomObject, mapper.orientation(), objectCache).getValue()).map(Double::parseDouble).orElse(null),
+                    resolve(iomObject, mapper.vAlign(), objectCache).getValue(),
+                    resolve(iomObject, mapper.hAlign(), objectCache).getValue(),
+                    resolve(iomObject, mapper.text(), objectCache).getValue(),
+                    mapper.mapping()));
+        }
+
+        // no match found
+        System.out.println("No match found for object with id \"" + iomObject.getobjectoid() + "\".");
+        return Optional.empty();
     }
 
     private interface Filter {
