@@ -49,7 +49,9 @@ public final class Main {
         Options cliOptions = createCliOptions();
         CommandLine commandLine = parseCommandLine(cliOptions, args);
 
-        if (commandLine.hasOption(OPTION_HELP)) {
+        if (commandLine == null) {
+            System.exit(1);
+        } else if (commandLine.hasOption(OPTION_HELP)) {
             printUsage(cliOptions);
         } else if (commandLine.hasOption(OPTION_VERSION)) {
             System.out.println(VERSION);
@@ -60,12 +62,14 @@ public final class Main {
                 System.exit(1);
             } else {
                 configureLogging(options.get());
-                processFiles(options.get());
+                if (!processFiles(options.get())) {
+                    System.exit(1);
+                }
             }
         }
     }
 
-    private static void processFiles(LK2DxfOptions options) {
+    private static boolean processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
 
         try (var dxfWriter = new DxfWriter(options.dxfFile(), 3, ObjectMapper.getLayerMappings(), "lk2dxf " + Main.VERSION)) {
@@ -82,14 +86,16 @@ public final class Main {
                 } catch (Exception e) {
                     System.err.println("Failed to process file: " + xtfFile);
                     e.printStackTrace();
-                    return;
+                    return false;
                 }
             }
         } catch (Exception e) {
             System.err.println("Failed to write DXF file: " + options.dxfFile());
             e.printStackTrace();
-            return;
+            return false;
         }
+
+        return true;
     }
 
     private static void configureLogging(LK2DxfOptions lk2DxfOptions) {
@@ -127,7 +133,6 @@ public final class Main {
         } catch (ParseException e) {
             System.err.println("Error parsing command line arguments: " + e.getMessage());
             printUsage(options);
-            System.exit(1);
             return null;
         }
     }
