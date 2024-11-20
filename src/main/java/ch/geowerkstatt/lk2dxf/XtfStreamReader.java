@@ -12,6 +12,8 @@ import ch.interlis.iox.StartBasketEvent;
 import ch.interlis.iox.StartTransferEvent;
 import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.utility.ReaderFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Spliterator;
@@ -24,8 +26,10 @@ import java.util.stream.StreamSupport;
  */
 public final class XtfStreamReader implements AutoCloseable {
     private static final ReaderFactory READER_FACTORY = new ReaderFactory();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final IoxReader reader;
+    private final String filename;
     private LKMapXtfReaderState state = null;
 
     /**
@@ -37,6 +41,7 @@ public final class XtfStreamReader implements AutoCloseable {
         LogEventFactory logEventFactory = new LogEventFactory();
         Settings settings = new Settings();
         this.reader = READER_FACTORY.createReader(xtfFile, logEventFactory, settings);
+        this.filename = xtfFile.getName();
     }
 
     /**
@@ -82,14 +87,14 @@ public final class XtfStreamReader implements AutoCloseable {
                                 throw new IllegalStateException("Unexpected start transfer event in state: " + state);
                             }
                             state = LKMapXtfReaderState.TRANSFER;
-                            System.out.println("Start transfer");
+                            LOGGER.info("Start transfer of \"{}\"", filename);
                         }
                         case StartBasketEvent startBasketEvent -> {
                             if (state != LKMapXtfReaderState.TRANSFER) {
                                 throw new IllegalStateException("Unexpected start basket event in state: " + state);
                             }
                             state = LKMapXtfReaderState.BASKET;
-                            System.out.println("Start basket \"" + startBasketEvent.getBid() + "\"");
+                            LOGGER.info("Start basket \"{}\"", startBasketEvent.getBid());
                         }
                         case ObjectEvent objectEvent -> {
                             if (state != LKMapXtfReaderState.BASKET) {
@@ -103,14 +108,14 @@ public final class XtfStreamReader implements AutoCloseable {
                                 throw new IllegalStateException("Unexpected end basket event in state: " + state);
                             }
                             state = LKMapXtfReaderState.TRANSFER;
-                            System.out.println("End basket");
+                            LOGGER.info("End basket");
                         }
                         case EndTransferEvent ignored -> {
                             if (state != LKMapXtfReaderState.TRANSFER) {
                                 throw new IllegalStateException("Unexpected end transfer event in state: " + state);
                             }
                             state = LKMapXtfReaderState.COMPLETED;
-                            System.out.println("End transfer");
+                            LOGGER.info("End transfer of \"{}\"", filename);
                             return false;
                         }
                         default -> throw new IllegalStateException("Unexpected iox event: " + event);

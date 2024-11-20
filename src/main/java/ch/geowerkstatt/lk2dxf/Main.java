@@ -1,6 +1,10 @@
 package ch.geowerkstatt.lk2dxf;
 
+import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.logging.StdListener;
 import ch.geowerkstatt.lk2dxf.mapping.ObjectMapper;
+import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.iox_j.utility.IoxUtility;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -8,6 +12,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
 import java.util.List;
@@ -23,6 +33,8 @@ public final class Main {
 
     private static final String VERSION;
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     static {
         String packageVersion = Main.class.getPackage().getImplementationVersion();
         VERSION = packageVersion != null ? packageVersion : "unknown";
@@ -37,7 +49,9 @@ public final class Main {
         Options cliOptions = createCliOptions();
         CommandLine commandLine = parseCommandLine(cliOptions, args);
 
-        if (commandLine.hasOption(OPTION_HELP)) {
+        if (commandLine == null) {
+            System.exit(1);
+        } else if (commandLine.hasOption(OPTION_HELP)) {
             printUsage(cliOptions);
         } else if (commandLine.hasOption(OPTION_VERSION)) {
             System.out.println(VERSION);
@@ -47,12 +61,20 @@ public final class Main {
                 printUsage(cliOptions);
                 System.exit(1);
             } else {
-                processFiles(options.get());
+                configureLogging(options.get());
+                if (!processFiles(options.get())) {
+                    System.exit(1);
+                }
             }
         }
     }
 
-    private static void processFiles(LK2DxfOptions options) {
+    /**
+     * Processes the input files and writes the generated DXF to the output file.
+     *
+     * @return {@code true} if the operation was successful, {@code false} otherwise.
+     */
+    private static boolean processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
 
         ObjectMapper objectMapper;
@@ -73,16 +95,44 @@ public final class Main {
 
                     objects.forEach(o -> o.writeToDxf(dxfWriter));
                 } catch (Exception e) {
-                    System.err.println("Failed to process file: " + xtfFile);
-                    e.printStackTrace();
-                    return;
+                    LOGGER.error("Failed to process file: {}", xtfFile, e);
+                    return false;
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to write DXF file: " + options.dxfFile());
-            e.printStackTrace();
-            return;
+            LOGGER.error("Failed to write DXF file: {}", options.dxfFile(), e);
+            return false;
         }
+
+        return true;
+    }
+
+    private static void configureLogging(LK2DxfOptions lk2DxfOptions) {
+        Level logLevel = lk2DxfOptions.trace() ? Level.TRACE : Level.INFO;
+        Configurator.setRootLevel(logLevel);
+
+        if (lk2DxfOptions.logfile().isPresent()) {
+            var layout = PatternLayout.newBuilder()
+                    .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
+                    .build();
+            var fileAppender = FileAppender.newBuilder()
+                    .setName("Logfile")
+                    .setLayout(layout)
+                    .withFileName(lk2DxfOptions.logfile().get())
+                    .withAppend(false)
+                    .build();
+            var rootLogger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
+            rootLogger.get().addAppender(fileAppender, logLevel, null);
+            fileAppender.start();
+        }
+
+        EhiLogger.getInstance().addListener(new EhiLogAdapter());
+        EhiLogger.getInstance().removeListener(StdListener.getInstance());
+
+        LOGGER.info("lk2dxf version {}", VERSION);
+        LOGGER.info("ili2c version {}", TransferDescription.getVersion());
+        LOGGER.info("iox-ili version {}", IoxUtility.getVersion());
+        LOGGER.info("Transfer files: {}", lk2DxfOptions.xtfFiles());
     }
 
     private static CommandLine parseCommandLine(Options options, String[] args) {
@@ -90,9 +140,8 @@ public final class Main {
             DefaultParser parser = new DefaultParser();
             return parser.parse(options, args);
         } catch (ParseException e) {
-            System.err.println("Error parsing command line arguments: " + e.getMessage());
+            LOGGER.error("Error parsing command line arguments: {}", e.getMessage());
             printUsage(options);
-            System.exit(1);
             return null;
         }
     }

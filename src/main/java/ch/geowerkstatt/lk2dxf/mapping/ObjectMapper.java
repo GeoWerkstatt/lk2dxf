@@ -18,6 +18,8 @@ import ch.interlis.ilirepository.IliManager;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
 import ch.interlis.iox_j.validator.Value;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +35,8 @@ import java.util.stream.Stream;
 
 public final class ObjectMapper {
     private static final String MODELS_RESOURCE = "/models";
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final List<LayerMapping> layerMappings;
     private final TransferDescription transferDescription;
 
@@ -332,7 +336,7 @@ public final class ObjectMapper {
         }
 
         try {
-            System.out.println("iliModelsPath: " + iliModelsPath);
+            LOGGER.debug("iliModelsPath: {}", iliModelsPath);
             var modelManager = new IliManager();
             modelManager.setRepositories(new String[]{iliModelsPath});
             var ili2cConfig = modelManager.getConfig(requiredModels, 0.0);
@@ -369,11 +373,11 @@ public final class ObjectMapper {
     private Optional<MappedObject> mapObject(IomObject iomObject, Map<String, IomObject> objectCache, Set<IomObject> objectsWithUnresolvedRef, boolean unresolvedReferencesAllowed) {
         var element = transferDescription.getElement(iomObject.getobjecttag());
         if (element == null) {
-            System.out.println("No element found for object with id \"" + iomObject.getobjectoid() + "\".");
+            LOGGER.error("No element \"{}\" found for object with id \"{}\".", iomObject.getobjecttag(), iomObject.getobjectoid());
             return Optional.empty();
         }
         if (!(element instanceof AbstractClassDef<?> classDef)) {
-            System.out.println("Element is not an AbstractClassDef for object with id \"" + iomObject.getobjectoid() + "\".");
+            LOGGER.error("Element \"{}\" is not an AbstractClassDef for object with id \"{}\".", iomObject.getobjecttag(), iomObject.getobjectoid());
             return Optional.empty();
         }
 
@@ -413,6 +417,8 @@ public final class ObjectMapper {
                     default -> { } // MATCH, continue with next filter
                 }
             }
+
+            LOGGER.trace("Mapped object of type \"{}\" with id \"{}\" to layer \"{}\".", iomObject.getobjecttag(), iomObject.getobjectoid(), mapper.mapping().layer());
             return Optional.of(new MappedObject(
                     iomObject.getobjectoid(),
                     Optional.ofNullable(resolve(iomObject, mapper.geometry(), objectCache).getComplexObjects()).map(Collection::iterator).map(Iterator::next).orElse(null),
@@ -424,7 +430,7 @@ public final class ObjectMapper {
         }
 
         // no match found
-        System.out.println("No match found for object with id \"" + iomObject.getobjectoid() + "\".");
+        LOGGER.warn("No match found for object of type \"{}\" with id \"{}\".", iomObject.getobjecttag(), iomObject.getobjectoid());
         return Optional.empty();
     }
 
