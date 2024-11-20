@@ -1,9 +1,15 @@
 package ch.geowerkstatt.lk2dxf.mapping;
 
+import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.logging.StdListener;
+import ch.geowerkstatt.lk2dxf.EhiLogAdapter;
 import ch.geowerkstatt.lk2dxf.MappedObject;
 import ch.geowerkstatt.lk2dxf.XtfStreamReader;
 import ch.interlis.iom.IomObject;
 import ch.interlis.iom_j.Iom_jObject;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -18,6 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public final class ObjectMapperTest {
     private static final String TEST_FILE = "src/test/data/MapperTest/MapWithText.xtf";
+
+    @BeforeAll
+    public static void setup() {
+        // Configure logging
+        Configurator.setRootLevel(Level.TRACE);
+        EhiLogger.getInstance().addListener(new EhiLogAdapter());
+        EhiLogger.getInstance().removeListener(StdListener.getInstance());
+    }
 
     @Test
     public void mapObject() throws Exception {
