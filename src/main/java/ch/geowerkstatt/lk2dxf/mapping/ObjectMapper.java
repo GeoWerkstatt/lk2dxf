@@ -80,7 +80,7 @@ public final class ObjectMapper {
                     analyzeCacheRequirements(pathElements, cacheRequirements);
                     var type = ((AttributeDef) pathElements.getLast().element).getDomainResolvingAliases();
                     if (!(type instanceof EnumerationType enumerationType)) {
-                        throw new IllegalArgumentException("Only enumeratino types supported: " + baseAttributeName);
+                        throw new IllegalArgumentException("Only enumeration types supported: " + baseAttributeName);
                     }
 
                     var attrFilter = new PathMatcher(pathElements, values.stream().map(v -> getTranslatedEnumValue(enumerationType, v)).toList());

@@ -53,7 +53,7 @@ public final class ObjectMapperTest {
     public void mappingContainsTextAttributeFilter() {
         var layerMappings = createTextLayerMapping(Map.of("Bemerkung", List.of("SULTIOND")));
         var exception = assertThrows(IllegalArgumentException.class, () -> new ObjectMapper(layerMappings));
-        assertEquals("Only enumeratino types supported: Bemerkung", exception.getMessage());
+        assertEquals("Only enumeration types supported: Bemerkung", exception.getMessage());
     }
 
     @Test
