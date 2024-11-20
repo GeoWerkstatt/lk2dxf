@@ -43,6 +43,14 @@ public final class DxfWriterTest {
     }
 
     @Test
+    public void writeEmptyDxfWithLayerMappings() throws Exception {
+        var dxfWriter = new DxfWriter(testOutputWriter, 3, List.of(createTestLayerMapping("Layer_A"), createTestLayerMapping("Layer_B")), "APETHOWN");
+        dxfWriter.close();
+
+        assertEquals("999\nAPETHOWN\n0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1021\n9\n$HANDSEED\n5\n3b9aca00\n9\n$INSUNITS\n70\n6\n0\nENDSEC\n0\nSECTION\n2\nCLASSES\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nVPORT\n5\n1\n100\nAcDbSymbolTable\n70\n1\n0\nVPORT\n5\n2\n100\nAcDbSymbolTableRecord\n100\nAcDbViewportTableRecord\n2\n*ACTIVE\n70\n0\n0\nENDTAB\n0\nTABLE\n2\nLTYPE\n5\n3\n100\nAcDbSymbolTable\n70\n5\n0\nLTYPE\n5\n4\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n2\nByLayer\n70\n0\n72\n65\n73\n0\n40\n0\n0\nLTYPE\n5\n5\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n2\nByBlock\n70\n0\n72\n65\n73\n0\n40\n0\n0\nLTYPE\n5\n6\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n2\nContinuous\n70\n0\n72\n65\n73\n0\n40\n0\n0\nLTYPE\n5\n7\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n2\nDashed\n70\n0\n72\n65\n73\n2\n40\n0.75\n49\n0.5\n74\n0\n49\n-0.25\n74\n0\n0\nLTYPE\n5\n8\n100\nAcDbSymbolTableRecord\n100\nAcDbLinetypeTableRecord\n2\nDashDotDot\n70\n0\n72\n65\n73\n6\n40\n1.25\n49\n0.5\n74\n0\n49\n-0.25\n74\n0\n49\n0\n74\n0\n49\n-0.25\n74\n0\n49\n0\n74\n0\n49\n-0.25\n74\n0\n0\nENDTAB\n0\nTABLE\n2\nLAYER\n5\n9\n100\nAcDbSymbolTable\n70\n3\n0\nLAYER\n5\nA\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n2\n0\n6\nContinuous\n370\n25\n62\n0\n70\n0\n390\n0\n0\nLAYER\n5\nB\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n2\nLayer_A\n6\nContinuous\n370\n25\n62\n1\n70\n0\n390\n0\n0\nLAYER\n5\nC\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n2\nLayer_B\n6\nContinuous\n370\n25\n62\n1\n70\n0\n390\n0\n0\nENDTAB\n0\nTABLE\n2\nSTYLE\n5\nD\n100\nAcDbSymbolTable\n70\n1\n0\nSTYLE\n5\nE\n100\nAcDbSymbolTableRecord\n100\nAcDbTextStyleTableRecord\n2\narial\n3\narial\n70\n0\n0\nENDTAB\n0\nTABLE\n2\nVIEW\n5\nF\n100\nAcDbSymbolTable\n70\n0\n0\nENDTAB\n0\nTABLE\n2\nUCS\n5\n10\n100\nAcDbSymbolTable\n70\n0\n0\nENDTAB\n0\nTABLE\n2\nAPPID\n5\n11\n100\nAcDbSymbolTable\n70\n1\n0\nAPPID\n5\n12\n100\nAcDbSymbolTableRecord\n100\nAcDbRegAppTableRecord\n2\nACAD\n70\n0\n0\nENDTAB\n0\nTABLE\n2\nDIMSTYLE\n5\n13\n100\nAcDbSymbolTable\n100\nAcDbDimStyleTable\n70\n0\n71\n1\n0\nENDTAB\n0\nTABLE\n2\nBLOCK_RECORD\n5\n14\n100\nAcDbSymbolTable\n70\n3\n0\nBLOCK_RECORD\n5\n15\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n2\n*Model_Space\n70\n0\n280\n1\n281\n0\n0\nBLOCK_RECORD\n5\n16\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n2\n*Paper_Space\n70\n0\n280\n1\n281\n0\n0\nBLOCK_RECORD\n5\n17\n100\nAcDbSymbolTableRecord\n100\nAcDbBlockTableRecord\n2\nTestSymbol\n70\n0\n280\n1\n281\n0\n0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nBLOCKS\n0\nBLOCK\n5\n18\n8\n0\n100\nAcDbEntity\n100\nAcDbBlockBegin\n2\n*Model_Space\n70\n0\n10\n0\n20\n0\n30\n0\n0\nENDBLK\n5\n19\n8\n0\n100\nAcDbEntity\n100\nAcDbBlockEnd\n0\nBLOCK\n5\n1A\n8\n0\n100\nAcDbEntity\n100\nAcDbBlockBegin\n2\n*Paper_Space\n70\n0\n10\n0\n20\n0\n30\n0\n0\nENDBLK\n5\n1B\n8\n0\n100\nAcDbEntity\n100\nAcDbBlockEnd\n0\nBLOCK\n5\n1C\n8\n0\n100\nAcDbEntity\n100\nAcDbBlockBegin\n2\nTestSymbol\n70\n0\n10\n0\n20\n0\n30\n0\n0\nCIRCLE\n5\n1D\n100\nAcDbEntity\n8\n0\n100\nAcDbCircle\n10\n0\n20\n0\n40\n0.5\n0\nENDBLK\n5\n1E\n8\n0\n100\nAcDbEntity\n100\nAcDbBlockEnd\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n0\nENDSEC\n0\nSECTION\n2\nOBJECTS\n0\nDICTIONARY\n5\n1F\n330\n0\n100\nAcDbDictionary\n281\n1\n3\nACAD_GROUP\n350\n20\n0\nDICTIONARY\n5\n20\n330\n1F\n100\nAcDbDictionary\n281\n1\n0\nENDSEC\n0\nEOF\n", stringWriter.toString());
+    }
+
+    @Test
     public void writeCircle() throws Exception {
         try (var dxfWriter = new DxfWriter(testOutputWriter)) {
             stringWriter.getBuffer().setLength(0);
@@ -200,6 +208,10 @@ public final class DxfWriterTest {
     }
 
     private Collection<LayerMapping> createTestLayerMappings() {
-        return List.of(new LayerMapping("Test", List.of(), LayerMapping.OutputType.SURFACE, "", 1, "", "", "", "", "TestSymbol", "", 0.25, 1.25, "arial", null));
+        return List.of(createTestLayerMapping("Test"));
+    }
+
+    private LayerMapping createTestLayerMapping(String layerName) {
+        return new LayerMapping(layerName, List.of(), LayerMapping.OutputType.SURFACE, "", 1, "", "", "", "", "TestSymbol", "", 0.25, 1.25, "arial", null);
     }
 }
