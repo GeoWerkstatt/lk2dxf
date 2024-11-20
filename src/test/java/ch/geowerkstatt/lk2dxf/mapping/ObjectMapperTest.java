@@ -3,10 +3,10 @@ package ch.geowerkstatt.lk2dxf.mapping;
 import ch.ehi.basics.logging.EhiLogger;
 import ch.ehi.basics.logging.StdListener;
 import ch.geowerkstatt.lk2dxf.EhiLogAdapter;
+import ch.geowerkstatt.lk2dxf.IomObjectHelper;
 import ch.geowerkstatt.lk2dxf.MappedObject;
 import ch.geowerkstatt.lk2dxf.XtfStreamReader;
 import ch.interlis.iom.IomObject;
-import ch.interlis.iom_j.Iom_jObject;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -96,9 +95,9 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("Plantyp", List.of("Leitungskataster")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var objA = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_A",
+        var objA = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_A",
                 o -> o.addattrvalue("Plantyp", "Leitungskataster"));
-        var objB = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_B",
+        var objB = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_B",
                 o -> o.addattrvalue("Plantyp", "Werkplan"));
 
         String[] actual = getMappedLayers(objectMapper, objA, objB);
@@ -110,9 +109,9 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("Plantyp", List.of("Werkplan", "Leitungskataster")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var objA = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_A",
+        var objA = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_A",
                 o -> o.addattrvalue("Plantyp", "Leitungskataster"));
-        var objB = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_B",
+        var objB = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_B",
                 o -> o.addattrvalue("Plantyp", "Werkplan"));
 
         String[] actual = getMappedLayers(objectMapper, objA, objB);
@@ -124,9 +123,9 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("Plantyp", List.of("Werkplan", "Uebersichtsplan.UeP10")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var objA = createIomObject("SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte", "obj_A",
+        var objA = IomObjectHelper.createIomObject("SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte", "obj_A",
                 o -> o.addattrvalue("TYPE_DE_PLAN", "plan_de_reseau"));
-        var objB = createIomObject("SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte", "obj_B",
+        var objB = IomObjectHelper.createIomObject("SIA405_LKMap_2015_f_LV95.SIA405_LKMap_f.LKOBJET_Texte", "obj_B",
                 o -> o.addattrvalue("TYPE_DE_PLAN", "plan_d_ensemble.pe10"));
 
         String[] actual = getMappedLayers(objectMapper, objA, objB);
@@ -138,9 +137,9 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("Plantyp", List.of("Uebersichtsplan")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var objA = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_A",
+        var objA = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_A",
                 o -> o.addattrvalue("Plantyp", "Uebersichtsplan.UeP5"));
-        var objB = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_B",
+        var objB = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "obj_B",
                 o -> o.addattrvalue("Plantyp", "Werkplan"));
 
         String[] actual = getMappedLayers(objectMapper, objA, objB);
@@ -152,11 +151,11 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("LKObjektRef->Objektart", List.of("Elektrizitaet")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var textObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
-                o -> o.addattrobj("LKObjektRef", createIomObject("REF", null,
+        var textObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
+                o -> o.addattrobj("LKObjektRef", IomObjectHelper.createIomObject("REF", null,
                         r -> r.setobjectrefoid("punktObj"))));
 
-        var pointObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt", "punktObj",
+        var pointObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt", "punktObj",
                 o -> o.addattrvalue("Objektart", "Elektrizitaet"));
 
         String[] actual = getMappedLayers(objectMapper, textObj, pointObj);
@@ -168,11 +167,11 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("LKObjektRef->Objektart", List.of("Elektrizitaet")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var textObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
-                o -> o.addattrobj("LKObjektRef", createIomObject("REF", null,
+        var textObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
+                o -> o.addattrobj("LKObjektRef", IomObjectHelper.createIomObject("REF", null,
                         r -> r.setobjectrefoid("punktObj"))));
 
-        var pointObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt", "punktObj",
+        var pointObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt", "punktObj",
                 o -> o.addattrvalue("Objektart", "Elektrizitaet"));
 
         String[] actual = getMappedLayers(objectMapper, pointObj, textObj);
@@ -184,8 +183,8 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("LKObjektRef->Objektart", List.of("Elektrizitaet")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var textObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
-                o -> o.addattrobj("LKObjektRef", createIomObject("REF", null,
+        var textObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
+                o -> o.addattrobj("LKObjektRef", IomObjectHelper.createIomObject("REF", null,
                         r -> r.setobjectrefoid("punktObj"))));
 
         var exception = assertThrows(IllegalStateException.class, () -> objectMapper.mapObjects(Stream.of(textObj)).toList());
@@ -197,7 +196,7 @@ public final class ObjectMapperTest {
         var layerMappings = createTextLayerMapping(Map.of("LKObjektRef->Objektart", List.of("Elektrizitaet")));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var textObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj");
+        var textObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj");
 
         String[] actual = getMappedLayers(objectMapper, textObj);
         assertArrayEquals(new String[] {"CatchAllText"}, actual);
@@ -211,12 +210,12 @@ public final class ObjectMapperTest {
                         "TestSymbol", "", 0.25, 1.25, "arial", Map.of("LKObjektRef->Objektart", List.of("Elektrizitaet"))));
         var objectMapper = new ObjectMapper(layerMappings);
 
-        var textObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
-                o -> o.addattrobj("LKObjektRef", createIomObject("REF", null,
+        var textObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKObjekt_Text", "textObj",
+                o -> o.addattrobj("LKObjektRef", IomObjectHelper.createIomObject("REF", null,
                         r -> r.setobjectrefoid("punktObj"))));
-        var pointObj = createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt", "punktObj",
+        var pointObj = IomObjectHelper.createIomObject("SIA405_LKMap_2015_LV95.SIA405_LKMap.LKPunkt", "punktObj",
                 o -> o.addattrvalue("Objektart", "Elektrizitaet"),
-                o -> o.addattrobj("Metaattribute", createIomObject("Metaattribute", null,
+                o -> o.addattrobj("Metaattribute", IomObjectHelper.createIomObject("Metaattribute", null,
                         m -> m.addattrvalue("Datenlieferant", "MINATERI"))));
 
         List<MappedObject> output = objectMapper.mapObjects(Stream.of(textObj, pointObj)).toList();
@@ -254,14 +253,5 @@ public final class ObjectMapperTest {
         return objectMapper.mapObjects(Stream.of(objects))
                 .map(o -> o.layerMapping().layer())
                 .toArray(String[]::new);
-    }
-
-    @SafeVarargs
-    private static IomObject createIomObject(String tag, String oid, Consumer<Iom_jObject>... attributeSetters) {
-        var iomObject = new Iom_jObject(tag, oid);
-        for (Consumer<Iom_jObject> attributeSetter : attributeSetters) {
-            attributeSetter.accept(iomObject);
-        }
-        return iomObject;
     }
 }
