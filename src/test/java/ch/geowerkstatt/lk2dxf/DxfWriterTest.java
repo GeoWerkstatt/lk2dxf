@@ -174,6 +174,15 @@ public final class DxfWriterTest {
         }
     }
 
+    @Test
+    public void writeMultiLineText() throws Exception {
+        try (var dxfWriter = new DxfWriter(testOutputWriter, 3, createTestLayerMappings(), null)) {
+            stringWriter.getBuffer().setLength(0);
+            dxfWriter.writeText("Test", "arial", "Multiline Text\r\nNext line with Tab <\t>", "Left", "Base", 90, 1.25, IomObjectHelper.createCoord("0", "0"));
+            assertEquals("0\nTEXT\n5\n1E\n100\nAcDbEntity\n8\nTest\n100\nAcDbText\n7\narial\n10\n0\n20\n0\n40\n1.25\n1\nMultiline Text\\U+000D\\U+000ANext line with Tab <\\U+0009>\n100\nAcDbText\n", stringWriter.toString());
+        }
+    }
+
     private IomObject[] createArcTestSegments(double pointRadius, double midPointRadius, int segmentCount) {
         var segments = new IomObject[segmentCount + 1];
         segments[0] = IomObjectHelper.createCoord(Double.toString(pointRadius), "0");

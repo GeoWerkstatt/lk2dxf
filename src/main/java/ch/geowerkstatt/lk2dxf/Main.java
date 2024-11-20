@@ -72,11 +72,17 @@ public final class Main {
     private static boolean processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
 
-        try (var dxfWriter = new DxfWriter(options.dxfFile(), 3, ObjectMapper.getLayerMappings(), "lk2dxf " + Main.VERSION)) {
+        ObjectMapper objectMapper;
+        try {
+            objectMapper = new ObjectMapper();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read layer mappings.", e);
+        }
+
+        try (var dxfWriter = new DxfWriter(options.dxfFile(), 3, objectMapper.getLayerMappings(), "lk2dxf " + Main.VERSION)) {
             for (String xtfFile : options.xtfFiles()) {
                 try (XtfStreamReader reader = new XtfStreamReader(new File(xtfFile))) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    Stream<MappedObject> objects = mapper.mapObjects(reader.readObjects());
+                    Stream<MappedObject> objects = objectMapper.mapObjects(reader.readObjects());
 
                     if (perimeter.isPresent()) {
                         objects = objects.filter(o -> perimeter.get().intersects(o.geometry()));
