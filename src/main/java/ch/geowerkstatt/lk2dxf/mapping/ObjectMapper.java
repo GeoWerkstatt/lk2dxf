@@ -127,6 +127,13 @@ public final class ObjectMapper {
         return Collections.unmodifiableList(layerMappings);
     }
 
+    /**
+     * Get the {@link TransferDescription} with all models used by the {@link LayerMapping}s.
+     */
+    public TransferDescription getTransferDescription() {
+        return transferDescription;
+    }
+
     private static boolean matchesEnumSubValue(List<String> allowedValues, String attrValue) {
         return allowedValues.stream().anyMatch(value -> attrValue.startsWith(value + "."));
     }
