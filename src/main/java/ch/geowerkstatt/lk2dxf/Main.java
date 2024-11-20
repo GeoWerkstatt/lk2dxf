@@ -1,6 +1,10 @@
 package ch.geowerkstatt.lk2dxf;
 
+import ch.ehi.basics.logging.EhiLogger;
+import ch.ehi.basics.logging.StdListener;
 import ch.geowerkstatt.lk2dxf.mapping.ObjectMapper;
+import ch.interlis.ili2c.metamodel.TransferDescription;
+import ch.interlis.iox_j.utility.IoxUtility;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -8,6 +12,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
 import java.util.List;
@@ -22,6 +32,8 @@ public final class Main {
     private static final String OPTION_VERSION = "version";
 
     private static final String VERSION;
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     static {
         String packageVersion = Main.class.getPackage().getImplementationVersion();
@@ -47,6 +59,7 @@ public final class Main {
                 printUsage(cliOptions);
                 System.exit(1);
             } else {
+                configureLogging(options.get());
                 processFiles(options.get());
             }
         }
@@ -77,6 +90,34 @@ public final class Main {
             e.printStackTrace();
             return;
         }
+    }
+
+    private static void configureLogging(LK2DxfOptions lk2DxfOptions) {
+        Level logLevel = lk2DxfOptions.trace() ? Level.TRACE : Level.INFO;
+        Configurator.setRootLevel(logLevel);
+
+        if (lk2DxfOptions.logfile().isPresent()) {
+            var layout = PatternLayout.newBuilder()
+                    .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
+                    .build();
+            var fileAppender = FileAppender.newBuilder()
+                    .setName("Logfile")
+                    .setLayout(layout)
+                    .withFileName(lk2DxfOptions.logfile().get())
+                    .withAppend(false)
+                    .build();
+            var rootLogger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
+            rootLogger.get().addAppender(fileAppender, logLevel, null);
+            fileAppender.start();
+        }
+
+        EhiLogger.getInstance().addListener(new EhiLogAdapter());
+        EhiLogger.getInstance().removeListener(StdListener.getInstance());
+
+        LOGGER.info("lk2dxf version {}", VERSION);
+        LOGGER.info("ili2c version {}", TransferDescription.getVersion());
+        LOGGER.info("iox-ili version {}", IoxUtility.getVersion());
+        LOGGER.info("Transfer files: {}", lk2DxfOptions.xtfFiles());
     }
 
     private static CommandLine parseCommandLine(Options options, String[] args) {
