@@ -336,7 +336,7 @@ public final class ObjectMapper {
         }
 
         try {
-            LOGGER.info("iliModelsPath: {}", iliModelsPath);
+            LOGGER.debug("iliModelsPath: {}", iliModelsPath);
             var modelManager = new IliManager();
             modelManager.setRepositories(new String[]{iliModelsPath});
             var ili2cConfig = modelManager.getConfig(requiredModels, 0.0);
