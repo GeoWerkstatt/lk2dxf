@@ -7,6 +7,8 @@ import ch.interlis.iox.IoxException;
 import ch.interlis.iox_j.jts.Iox2jtsext;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public record MappedObject(
         String oid,
@@ -18,6 +20,7 @@ public record MappedObject(
         String text,
         LayerMapping layerMapping) {
     private static final GeometryFactory GEOMETRY_FACTORY = new JtsextGeometryFactory();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * Creates a new {@link MappedObject} that contains all information to process the object further.
@@ -59,8 +62,7 @@ public record MappedObject(
                 default -> throw new AssertionError("Unknown output type: " + layerMapping().output());
             }
         } catch (Exception e) {
-            System.err.println("Failed to write object: " + oid() + " to dxf.");
-            e.printStackTrace();
+            LOGGER.error("Failed to write object: {} to dxf.", oid(), e);
         }
     }
 }

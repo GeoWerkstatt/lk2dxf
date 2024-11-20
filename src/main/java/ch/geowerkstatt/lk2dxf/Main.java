@@ -90,14 +90,12 @@ public final class Main {
 
                     objects.forEach(o -> o.writeToDxf(dxfWriter));
                 } catch (Exception e) {
-                    System.err.println("Failed to process file: " + xtfFile);
-                    e.printStackTrace();
+                    LOGGER.error("Failed to process file: {}", xtfFile, e);
                     return false;
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to write DXF file: " + options.dxfFile());
-            e.printStackTrace();
+            LOGGER.error("Failed to write DXF file: {}", options.dxfFile(), e);
             return false;
         }
 
@@ -137,7 +135,7 @@ public final class Main {
             DefaultParser parser = new DefaultParser();
             return parser.parse(options, args);
         } catch (ParseException e) {
-            System.err.println("Error parsing command line arguments: " + e.getMessage());
+            LOGGER.error("Error parsing command line arguments: {}", e.getMessage());
             printUsage(options);
             return null;
         }
