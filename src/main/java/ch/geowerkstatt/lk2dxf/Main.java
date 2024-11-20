@@ -69,6 +69,11 @@ public final class Main {
         }
     }
 
+    /**
+     * Processes the input files and writes the generated DXF to the output file.
+     *
+     * @return {@code true} if the operation was successful, {@code false} otherwise.
+     */
     private static boolean processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
 
