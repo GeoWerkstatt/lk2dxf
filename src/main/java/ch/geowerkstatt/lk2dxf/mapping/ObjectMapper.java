@@ -52,9 +52,9 @@ public final class ObjectMapper {
      * @param layerMappings The layer mappings to use.
      */
     public ObjectMapper(List<LayerMapping> layerMappings) throws IOException, URISyntaxException, Ili2cException {
-            this.layerMappings = layerMappings;
-            transferDescription = getTransferDescription(layerMappings);
-            analyzeLayerMappings();
+        this.layerMappings = layerMappings;
+        transferDescription = getTransferDescription(layerMappings);
+        analyzeLayerMappings();
     }
 
     /**
@@ -80,7 +80,7 @@ public final class ObjectMapper {
                     analyzeCacheRequirements(pathElements, cacheRequirements);
                     var type = ((AttributeDef) pathElements.getLast().element).getDomainResolvingAliases();
                     if (!(type instanceof EnumerationType enumerationType)) {
-                        throw new IllegalArgumentException("Only enumeratino types supported" + baseAttributeName);
+                        throw new IllegalArgumentException("Only enumeratino types supported: " + baseAttributeName);
                     }
 
                     var attrFilter = new PathMatcher(pathElements, values.stream().map(v -> getTranslatedEnumValue(enumerationType, v)).toList());
@@ -91,22 +91,22 @@ public final class ObjectMapper {
                 var mapper = switch (layerMapping.output()) {
                     case SURFACE, LINE -> new Mapper(filter,
                             layerMapping,
-                            getTranslatedPath(classDef, layerMapping.geometry()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.geometry()),
                             null,
                             null,
                             null,
                             null);
                     case TEXT -> new Mapper(filter,
                             layerMapping,
-                            getTranslatedPath(classDef, layerMapping.geometry()),
-                            getTranslatedPath(classDef, layerMapping.orientation()),
-                            getTranslatedPath(classDef, layerMapping.vAlign()),
-                            getTranslatedPath(classDef, layerMapping.hAlign()),
-                            getTranslatedPath(classDef, layerMapping.text()));
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.geometry()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.orientation()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.vAlign()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.hAlign()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.text()));
                     case POINT -> new Mapper(filter,
                             layerMapping,
-                            getTranslatedPath(classDef, layerMapping.geometry()),
-                            getTranslatedPath(classDef, layerMapping.orientation()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.geometry()),
+                            getAndAnalyzeTranslatedPath(classDef, layerMapping.orientation()),
                             null,
                             null,
                             null);
@@ -203,10 +203,13 @@ public final class ObjectMapper {
     }
 
     /**
+     * Get the translated path elements for the given attribute path. Analyzes the path for cache requirements.
      * @see #getTranslatedPath(AbstractClassDef, List)
      */
-    private static List<PathElement> getTranslatedPath(AbstractClassDef<?> viewable, String basePathElements) {
-        return getTranslatedPath(viewable, Arrays.asList(basePathElements.split("->")));
+    private List<PathElement> getAndAnalyzeTranslatedPath(AbstractClassDef<?> viewable, String basePathElements) {
+        var path = getTranslatedPath(viewable, Arrays.asList(basePathElements.split("->")));
+        analyzeCacheRequirements(path, cacheRequirements);
+        return path;
     }
 
     /**
@@ -255,12 +258,13 @@ public final class ObjectMapper {
     private static AbstractLeafElement getTranslatedAttributeOrRole(Viewable<?> viewable, String attributeBaseName) {
         for (ExtendableContainer<?> extension : viewable.getExtensions()) {
             for (var it = ((Viewable<?>) extension).getAttributesAndRoles2(); it.hasNext();) {
-                var result = switch (it.next().obj) {
+                var element = it.next().obj;
+                var result = switch (element) {
                     case AttributeDef attributeDef ->
                             (attributeDef.getTranslationOfOrSame().getName().equals(attributeBaseName) ? attributeDef : null);
                     case RoleDef roleDef ->
                             (roleDef.getTranslationOfOrSame().getName().equals(attributeBaseName) ? roleDef : null);
-                    default -> throw new IllegalStateException("Unexpected value: " + it.next().obj);
+                    default -> throw new IllegalStateException("Unexpected value: " + element);
                 };
 
                 if (result != null) {
@@ -391,29 +395,37 @@ public final class ObjectMapper {
             objectCache.put(iomObject.getobjectoid(), cacheObject);
         }
 
-        return filters.stream()
-                .filter(filter -> filter.filter.stream().allMatch((f) ->
-                        switch (f.matches(iomObject, objectCache)) {
-                            case UNRESOLVED_REF -> {
-                                if (unresolvedReferencesAllowed) {
-                                    objectsWithUnresolvedRef.add(iomObject);
-                                    yield false;
-                                } else {
-                                    throw new IllegalStateException("Unresolved reference in object with id \"" + iomObject.getobjectoid() + "\".");
-                                }
-                            }
-                            case MATCH -> true;
-                            case NO_MATCH -> false;
-                        }))
-                .findFirst()
-                .map(filter -> new MappedObject(
-                        iomObject.getobjectoid(),
-                        Optional.ofNullable(resolve(iomObject, filter.geometry(), objectCache).getComplexObjects()).map(Collection::iterator).map(Iterator::next).orElse(null),
-                        Optional.ofNullable(resolve(iomObject, filter.orientation(), objectCache).getValue()).map(Double::parseDouble).orElse(null),
-                        resolve(iomObject, filter.vAlign(), objectCache).getValue(),
-                        resolve(iomObject, filter.hAlign(), objectCache).getValue(),
-                        resolve(iomObject, filter.text(), objectCache).getValue(),
-                        filter.mapping()));
+        mapperLoop:
+        for (var mapper : filters) {
+            for (var filter : mapper.filter) {
+                switch (filter.matches(iomObject, objectCache)) {
+                    case UNRESOLVED_REF -> {
+                        if (unresolvedReferencesAllowed) {
+                            objectsWithUnresolvedRef.add(iomObject);
+                            return Optional.empty();
+                        } else {
+                            throw new IllegalStateException("Unresolved reference in object with id \"" + iomObject.getobjectoid() + "\".");
+                        }
+                    }
+                    case NO_MATCH -> {
+                        continue mapperLoop;
+                    }
+                    default -> { } // MATCH, continue with next filter
+                }
+            }
+            return Optional.of(new MappedObject(
+                    iomObject.getobjectoid(),
+                    Optional.ofNullable(resolve(iomObject, mapper.geometry(), objectCache).getComplexObjects()).map(Collection::iterator).map(Iterator::next).orElse(null),
+                    Optional.ofNullable(resolve(iomObject, mapper.orientation(), objectCache).getValue()).map(Double::parseDouble).orElse(null),
+                    resolve(iomObject, mapper.vAlign(), objectCache).getValue(),
+                    resolve(iomObject, mapper.hAlign(), objectCache).getValue(),
+                    resolve(iomObject, mapper.text(), objectCache).getValue(),
+                    mapper.mapping()));
+        }
+
+        // no match found
+        System.out.println("No match found for object with id \"" + iomObject.getobjectoid() + "\".");
+        return Optional.empty();
     }
 
     private interface Filter {
