@@ -110,7 +110,8 @@ public final class Main {
                         o.writeToDxf(dxfWriter);
 
                         objectCounter.incrementAndGet();
-                        incrementLayerCounter(layerCounters, o.layerMapping().layer());
+                        String layer = o.layerMapping().layer();
+                        layerCounters.computeIfAbsent(layer, k -> new AtomicInteger()).incrementAndGet();
                     });
                 } catch (Exception e) {
                     LOGGER.error("Failed to process file: {}", xtfFile, e);
@@ -129,15 +130,6 @@ public final class Main {
                 .forEach(entry -> LOGGER.info("Layer {}: {} objects", entry.getKey(), entry.getValue().get()));
 
         return true;
-    }
-
-    private static void incrementLayerCounter(Map<String, AtomicInteger> layerCounters, String layer) {
-        AtomicInteger counter = layerCounters.get(layer);
-        if (counter == null) {
-            layerCounters.put(layer, new AtomicInteger(1));
-        } else {
-            counter.incrementAndGet();
-        }
     }
 
     private static void configureLogging(LK2DxfOptions lk2DxfOptions) {
