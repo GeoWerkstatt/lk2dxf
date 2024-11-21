@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -43,8 +44,8 @@ public final class IntegrationTest {
     @Test
     public void multipleFilesWithPerimeter() throws IOException, URISyntaxException, Ili2cException, IoxException {
         // Clear output file
-        var output = TEST_OUT_DIR + "multipleFilesWithPerimeter" + ".dxf";
-        var outputFile = new File(output);
+        var outputFile = new File(TEST_OUT_DIR + "multipleFilesWithPerimeter" + ".dxf");
+        var logFile = new File(TEST_OUT_DIR + "multipleFilesWithPerimeter" + ".log");
         if (outputFile.exists()) {
             assertTrue(outputFile.delete(), "Failed to delete existing output file");
         }
@@ -61,13 +62,17 @@ public final class IntegrationTest {
 
         // Run the main method
         var perimeter = "Polygon ((2740857.55514180986210704 1256024.12385561061091721, 2607598.44303888687863946 1264279.11310092429630458, 2508533.20150150312110782 1106392.40145171224139631, 2578116.33859133720397949 1101537.89655045163817704, 2625680.80043338378891349 1178584.46284004743210971, 2706265.21925668558105826 1173867.3261284395121038, 2740857.55514180986210704 1101930.99127641879022121, 2795890.81677723582834005 1100751.7070985168684274, 2740857.55514180986210704 1256024.12385561061091721))";
-        Main.main(Stream.concat(files.stream().map(File::getAbsolutePath), Stream.of(output, "--perimeter", perimeter)).toArray(String[]::new));
+        Main.main(Stream.concat(files.stream().map(File::getAbsolutePath), Stream.of(outputFile.getAbsolutePath(), "--perimeter", perimeter, "--logfile", logFile.getAbsolutePath())).toArray(String[]::new));
 
-        // Check output file
+        // Check output
         assertTrue(outputFile.exists());
         assertTrue(outputFile.isFile());
         assertTrue(outputFile.length() < 1_150_000, "Output file is too large <" + outputFile.length() + "> did the perimeter filter work?");
         assertTrue(outputFile.length() > 10_000, "The output file is too small <" + outputFile.length() + "> it contains not much more than the default dxf content!");
+
+        assertTrue(logFile.exists());
+        assertTrue(logFile.isFile());
+        assertTrue(Files.readString(logFile.toPath()).contains("The output DXF file contains 2606 mapped objects"));
     }
 
     private void writeTestXTF(File file, int seed, int objectCount) throws IOException, URISyntaxException, Ili2cException, IoxException {
