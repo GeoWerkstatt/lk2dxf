@@ -20,8 +20,13 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public final class Main {
@@ -46,6 +51,7 @@ public final class Main {
      * Application entry point.
      */
     public static void main(String[] args) {
+        Instant start = Instant.now();
         Options cliOptions = createCliOptions();
         CommandLine commandLine = parseCommandLine(cliOptions, args);
 
@@ -65,6 +71,11 @@ public final class Main {
                 if (!processFiles(options.get())) {
                     System.exit(1);
                 }
+
+                Instant end = Instant.now();
+                Duration duration = Duration.between(start, end);
+                String formattedDuration = String.format("%02dh:%02dm:%02ds.%03dms", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart(), duration.toMillisPart());
+                LOGGER.info("Processing took {}", formattedDuration);
             }
         }
     }
@@ -76,6 +87,8 @@ public final class Main {
      */
     private static boolean processFiles(LK2DxfOptions options) {
         Optional<Geometry> perimeter = options.parsePerimeter();
+        AtomicInteger objectCounter = new AtomicInteger();
+        Map<String, AtomicInteger> layerCounters = new HashMap<>();
 
         ObjectMapper objectMapper;
         try {
@@ -93,7 +106,13 @@ public final class Main {
                         objects = objects.filter(o -> perimeter.get().intersects(o.geometry()));
                     }
 
-                    objects.forEach(o -> o.writeToDxf(dxfWriter));
+                    objects.forEach(o -> {
+                        o.writeToDxf(dxfWriter);
+
+                        objectCounter.incrementAndGet();
+                        String layer = o.layerMapping().layer();
+                        layerCounters.computeIfAbsent(layer, k -> new AtomicInteger()).incrementAndGet();
+                    });
                 } catch (Exception e) {
                     LOGGER.error("Failed to process file: {}", xtfFile, e);
                     return false;
@@ -103,6 +122,12 @@ public final class Main {
             LOGGER.error("Failed to write DXF file: {}", options.dxfFile(), e);
             return false;
         }
+
+        LOGGER.info("The output DXF file contains {} mapped objects", objectCounter.get());
+        layerCounters.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> LOGGER.info("Layer {}: {} objects", entry.getKey(), entry.getValue().get()));
 
         return true;
     }
