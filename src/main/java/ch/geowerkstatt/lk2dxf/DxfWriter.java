@@ -100,7 +100,7 @@ public final class DxfWriter implements AutoCloseable {
                         () -> writeLineType("DashDotDot", 0.5, -0.25, 0.0, -0.25, 0.0, -0.25)),
                 () -> writeTable("LAYER", layers.values().toArray(ContentWriter[]::new)),
                 () -> writeTable("STYLE",
-                        layerMappings.stream().map(LayerMapping::font).filter(f -> !f.isBlank()).map(f -> (ContentWriter) () -> writeStyle(f, f)).toArray(ContentWriter[]::new)),
+                        layerMappings.stream().map(LayerMapping::font).filter(f -> !f.isBlank()).distinct().map(f -> (ContentWriter) () -> writeStyle(f, f)).toArray(ContentWriter[]::new)),
                 () -> writeTable("VIEW"),
                 () -> writeTable("UCS"),
                 () -> writeTable("APPID",
