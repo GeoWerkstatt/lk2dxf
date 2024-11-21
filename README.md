@@ -16,8 +16,14 @@ A [docker image](https://github.com/GeoWerkstatt/lk2dxf/pkgs/container/lk2dxf) c
 
 ## Usage
 
+Starting from JAR:
 ```shell
 java -jar lk2dxf.jar [options] <XTF input files ...> <DXF output file>
+```
+
+Starting with Docker:
+```shell
+docker run -it --rm -v ${PWD}:/host ghcr.io/geowerkstatt/lk2dxf [options] <XTF inputs inside volume: /host/**/*.xtf> <DXF output inside volume: /host/**/*.dxf>
 ```
 
 ### Commandline Options
